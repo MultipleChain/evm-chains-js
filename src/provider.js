@@ -1,25 +1,45 @@
-const Web3 = require('web3');
-const utils = require('./utils');
+const {ethers} = require('ethers');
 const Coin = require('./entity/coin');
 const Token = require('./entity/token');
-const Contract = require('./entity/token');
+const Contract = require('./entity/contract');
 const Transaction = require('./entity/transaction');
 
 class Provider {
 
-    web3;
+    /**
+     * @var {Object}
+     */
+    ethers;
 
+    /**
+     * @var {Object}
+     */
     methods;
 
+    /**
+     * @var {Boolean}
+     */
     testnet = false;
 
+    /**
+     * @var {String}
+     */
     infuraId = null;
 
-    network = null;
+    /**
+     * @var {Object}
+     */
+    network = {};
 
+    /**
+     * @var {Object}
+     */
     detectedWallets = {};
 
-    connectedWallet = null;
+    /**
+     * @var {Object}
+     */
+    connectedWallet = {};
 
     /**
      * @param {Object} network 
@@ -43,23 +63,20 @@ class Provider {
         }
 
         if (typeof window == 'undefined') {
-            this.setWeb3(new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
+            this.setEthersProvider(new ethers.providers.JsonRpcProvider(this.network.rpcUrl));
         }
 
         this.detectWallets();
     }
 
     /**
-     * @param {Web3} web3 
+     * @param {Object} ethersProvider 
      */
-    setWeb3(web3) {
-        this.web3 = web3;
-        if (!window) {
-            this.methods = web3.eth;
-        } else {
-            let Methods = require('./methods');
-            this.methods = new Methods(web3);
-        }
+    setEthersProvider(ethersProvider) {
+        this.ethers = ethers;
+        this.ethers.currentProvider = ethersProvider;
+        let Methods = require('./methods');
+        this.methods = new Methods(this);
     }
 
     /**
@@ -70,33 +87,9 @@ class Provider {
     }
 
     /**
-     * @param {Object} data 
-     * @returns {String}
+     * @param {String} adapter 
+     * @returns {Promise}
      */
-    getEstimateGas(data) {
-        return new Promise((resolve, reject) => {
-            this.web3.eth.estimateGas(data, function(err, gas) {
-                if (!err) {
-                    resolve(utils.hex(gas));
-                } else {
-                    utils.rejectMessage(err, reject);
-                }
-            });
-        });
-    }
-
-    getGasPrice() {
-        return new Promise((resolve, reject) => {
-            this.web3.eth.getGasPrice(function(err, gasPrice) {
-                if (!err) {
-                    resolve(utils.hex(gasPrice.toString()));
-                } else {
-                    utils.rejectMessage(err, reject);
-                }
-            });
-        });
-    }
-
     connectWallet(adapter) {
         return new Promise(async (resolve, reject) => {
             if (this.detectedWallets[adapter]) {
@@ -114,6 +107,10 @@ class Provider {
         });
     }
 
+    /**
+     * @param {Array} filter 
+     * @returns {Array}
+     */
     getDetectedWallets(filter) {
         return Object.fromEntries(Object.entries(this.detectedWallets).filter(([key]) => {
             return filter.includes(key);
@@ -144,18 +141,35 @@ class Provider {
         }
     }
 
+    /**
+     * @returns {Coin}
+     */
     Coin() {
         return new Coin(this);
     }
 
+    /**
+     * @param {String} address 
+     * @param {Array} abi 
+     * @returns {Token}
+     */
     Token(address, abi = null) {
         return new Token(address, abi, this);
     }
     
+    /**
+     * @param {String} address 
+     * @param {Array} abi 
+     * @returns {Contract}
+     */
     Contract(address, abi) {
         return new Contract(address, abi, this);
     }
 
+    /**
+     * @param {String} hash 
+     * @returns {Transaction}
+     */
     Transaction(hash) {
         return new Transaction(hash, this);
     }

@@ -1,13 +1,23 @@
-const utils = require('../utils');
-
 class Contract {
 
+    /**
+     * @var {Object}
+     */
     provider;
 
+    /**
+     * @var {String}
+     */
     address;
     
+    /**
+     * @var {Object}
+     */
     contract;
 
+    /**
+     * @var {Number}
+     */
     defaultGas = 50000;
 
     /**
@@ -18,7 +28,14 @@ class Contract {
     constructor(address, abi, provider) {
         this.address = address;
         this.provider = provider;
-        this.contract = provider.methods.contract(abi).at(address);
+        this.contract = provider.methods.contract(address, abi);
+    }
+
+    /**
+     * @returns {String}
+     */
+    getAddress() {
+        return this.address;
     }
 
     /**
@@ -31,19 +48,12 @@ class Contract {
     }
 
     /**
-     * @returns {String}
-     */
-    getAddress() {
-        return this.address;
-    }
-
-    /**
      * @param {String} method 
      * @param  {...any} params 
      * @returns {Promise}
      */
     call(method, ...params) {
-        this.contract[method](...params);
+        return this.contract[method](...params);
     }
 }
 

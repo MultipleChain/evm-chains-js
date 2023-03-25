@@ -1,58 +1,100 @@
-const Web3  = require('web3');
+const {ethers} = require('ethers');
 const utils = require('./utils');
-const Coin  = require('./entity/coin');
+const Coin = require('./entity/coin');
 const Token = require('./entity/token');
 const Transaction = require('./entity/transaction');
 const getAdapter = require('./get-adapter');
 
 class Wallet {
 
-    web3;
-
+    /**
+     * @var {Object}
+     */
     adapter;
 
+    /**
+     * @var {Object}
+     */
     wallet;
     
+    /**
+     * @var {Object}
+     */
     provider;
 
+    /**
+     * @var {Object}
+     */
     connectedNetwork;
     
+    /**
+     * @var {String}
+     */
     connectedAccount;
 
+    /**
+     * @param {String} adapter 
+     * @param {Object} provider 
+     */
     constructor(adapter, provider) {
         this.provider = provider;
         this.setAdapter(adapter);
     }
 
+    /**
+     * @param {String} adapter 
+     */
     setAdapter(adapter) {
         this.adapter = getAdapter(adapter, this.provider);
         this.wallet = this.adapter.wallet;
     }
 
+    /**
+     * @returns {String}
+     */
     getKey() {
         return this.adapter.key;
     }
 
+    /**
+     * @returns {String}
+     */
     getName() {
         return this.adapter.name;
     }
 
+    /**
+     * @returns {String}
+     */
     getType() {
         return this.adapter.type;
     }
 
+    /**
+     * @returns {String}
+     */
     getDeepLink() {
         return this.adapter.deepLink;
     }
 
+    /**
+     * @param {Object} params
+     * @returns {Prmise}
+     */
     request(params) {
         return this.wallet.request(params);
     }
 
+    /**
+     * @returns {Array}
+     */
     getAccounts() {
         return this.request({ method: 'eth_accounts' });
     }
 
+    /**
+     * @returns {String}
+     */
     async getChainHexId() {
         let id = await this.request({method: 'eth_chainId'});
         if (id == '0x01') return '0x1';
@@ -60,10 +102,16 @@ class Wallet {
         return id;
     };
 
+    /**
+     * @returns {Boolean}
+     */
     async isConnected() {
         return (await this.getAccounts()).length !== 0;
     }
 
+    /**
+     * @returns {Promise}
+     */
     connect() {
         return new Promise((resolve, reject) => {
 
@@ -94,6 +142,9 @@ class Wallet {
         });
     }
 
+    /**
+     * @returns {Promise}
+     */
     connection() {
         return new Promise((resolve, reject) => {
             this.adapter.connect()
@@ -101,7 +152,7 @@ class Wallet {
                 let chainHexId = await this.getChainHexId();
                 if (this.provider.network.hexId == chainHexId) {
                     this.provider.setConnectedWallet(this);
-                    this.provider.setWeb3(new Web3(this.wallet));
+                    this.provider.setEthersProvider(new ethers.providers.Web3Provider(this.wallet));
 
                     this.connectedAccount = connectedAccount;
                     this.connectedNetwork = this.provider.network;;
@@ -116,6 +167,10 @@ class Wallet {
         })
     }
 
+    /**
+     * @param {Array} params 
+     * @returns {Promise}
+     */
     sendTransaction(params) {
         return new Promise(async (resolve, reject) => {
             this.request({
@@ -147,7 +202,7 @@ class Wallet {
 
                 this.sendTransaction(data)
                 .then((transactionId) => {
-                    resolve(this.transaction(transactionId));
+                    resolve(this.provider.Transaction(transactionId));
                 })
                 .catch((error) => {
                     utils.rejectMessage(error, reject);
@@ -173,7 +228,7 @@ class Wallet {
                 
                 this.sendTransaction(data)
                 .then((transactionId) => {
-                    resolve(this.transaction(transactionId));
+                    resolve(this.provider.Transaction(transactionId));
                 })
                 .catch((error) => {
                     utils.rejectMessage(error, reject);
@@ -197,30 +252,6 @@ class Wallet {
         } else {
             return this.coinTransfer(to, amount);
         }
-    }
-
-    /**
-     * @param {String} address 
-     * @param {Array} abi 
-     * @return {Token}
-     */
-    token(address, abi = null) {
-        return new Token(address, abi);
-    }
-
-    /**
-     * @return {Coin}
-     */
-    coin() {
-        return new Coin();
-    }
-
-    /**
-     * @param {String} transactionId 
-     * @return {Transaction}
-     */
-    transaction(transactionId) {
-        return new Transaction(transactionId, this)
     }
 
     /**

@@ -5,6 +5,10 @@ const adapters = {
     walletconnect: require('./adapters/walletconnect')
 }
 
+/**
+ * @param {String} adapter
+ * @param {Object} provider
+ */
 module.exports = getAdapter = (adapter, provider) => {
     return adapters[adapter](provider);
 }

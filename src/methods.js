@@ -1,48 +1,78 @@
+const utils = require('./utils');
+
 class Methods {
 
-    web3;
+    /**
+     * @var {Object}
+     */
+    provider;
 
-    wallet;
+    /**
+     * @var {Object}
+     */
+    ethersProvider;
 
-    methods;
-
-    constructor(web3) {
-        this.web3 = web3;
-        this.methods = web3.eth;
-        this.wallet = web3.currentProvider;
+    /**
+     * @param {Object} provider 
+     */
+    constructor(provider) {
+        this.provider = provider;
+        this.ethersProvider = provider.ethers.currentProvider;
     }
 
-    contract(abi) {
-        return this.methods.contract(abi);
+    /**
+     * @param {String} address 
+     * @param {Array} abi 
+     * @returns {Object}
+     */
+    contract(address, abi) {
+        return new this.provider.ethers.Contract(address, abi, this.ethersProvider);
+    }
+
+    /**
+     * @param {Object} data 
+     * @returns {String}
+     */
+    async getEstimateGas(data) {
+        return utils.hex((await this.ethersProvider.estimateGas(data)).toString());
+    }
+
+    /**
+     * @returns {String}
+     */
+    async getGasPrice() {
+        return utils.hex((await this.ethersProvider.getGasPrice()).toString());
     }
     
+    /**
+     * @returns {Number}
+     */
     getBlockNumber() {
-        return new Promise((resolve) => {
-            this.methods.getBlockNumber(function(err, blockNumber) {
-                resolve(blockNumber);
-            })
-        });
+        return this.ethersProvider.getBlockNumber();
     }
 
+    /**
+     * @param {String} hash 
+     * @returns {Object}
+     */
     getTransaction(hash) {
-        return this.wallet.request({
-            method: 'eth_getTransactionByHash',
-            params: [hash]
-        });
+        return this.ethersProvider.getTransaction(hash);
     }
 
+    /**
+     * @param {String} hash 
+     * @returns {Object}
+     */
     getTransactionReceipt(hash) {
-        return this.wallet.request({
-            method: 'eth_getTransactionReceipt',
-            params: [hash]
-        });
+        return this.ethersProvider.getTransactionReceipt(hash);
     }
 
-    getBalance(address) {
-        return this.wallet.request({
-            method: 'eth_getBalance', 
-            params: [address, 'latest']
-        });
+    /**
+     * @param {String} hash 
+     * @returns {Number}
+     */
+    async getBalance(address) {
+        return (await this.ethersProvider.getBalance(address));
     }
     
 }

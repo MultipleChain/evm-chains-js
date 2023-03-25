@@ -26,7 +26,20 @@ class Coin {
         this.symbol = provider.network.nativeCurrency.symbol;
     }
 
-    
+    /**
+     * @returns {String}
+     */
+    getSymbol() {
+        return this.symbol;
+    }
+
+    /**
+     * @returns {Integer}
+     */
+    getDecimals() {
+        return this.decimals;
+    }
+
     /**
      * @param {String} address
      * @returns {Float}
@@ -54,7 +67,7 @@ class Coin {
 
             amount = utils.toHex(amount, this.decimals);
             
-            let gas = await this.provider.getEstimateGas({
+            let gas = await this.provider.methods.getEstimateGas({
                 to,
                 from,
                 value: amount
@@ -67,20 +80,6 @@ class Coin {
                 gas
             }]);
         });
-    }
-
-    /**
-     * @returns {String}
-     */
-    getSymbol() {
-        return this.symbol;
-    }
-
-    /**
-     * @returns {Integer}
-     */
-    getDecimals() {
-        return this.decimals;
     }
 }
 
