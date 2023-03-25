@@ -1,4 +1,5 @@
 const utils = require('./utils');
+const {ethers} = require('ethers');
 
 class Methods {
 
@@ -27,7 +28,7 @@ class Methods {
      * @returns {Object}
      */
     contract(address, abi) {
-        return new this.provider.ethers.Contract(address, abi, this.web3Provider);
+        return new ethers.Contract(address, abi, this.web3Provider);
     }
 
     /**

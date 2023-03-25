@@ -1,8 +1,5 @@
 const {ethers} = require('ethers');
 const utils = require('./utils');
-const Coin = require('./entity/coin');
-const Token = require('./entity/token');
-const Transaction = require('./entity/transaction');
 const getAdapter = require('./get-adapter');
 
 class Wallet {
