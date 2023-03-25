@@ -27,7 +27,7 @@ class Methods {
      * @returns {Object}
      */
     contract(address, abi) {
-        return new this.provider.ethers.Contract(address, abi, this.web3Provider);
+        return new web3Provider.eth.Contract(abi, address);
     }
 
     /**
@@ -35,21 +35,21 @@ class Methods {
      * @returns {String}
      */
     async getEstimateGas(data) {
-        return utils.hex((await this.web3Provider.estimateGas(data)).toString());
+        return utils.hex((await this.web3Provider.eth.estimateGas(data)).toString());
     }
 
     /**
      * @returns {String}
      */
     async getGasPrice() {
-        return utils.hex((await this.web3Provider.getGasPrice()).toString());
+        return utils.hex((await this.web3Provider.eth.getGasPrice()).toString());
     }
     
     /**
      * @returns {Number}
      */
     getBlockNumber() {
-        return this.web3Provider.getBlockNumber();
+        return this.web3Provider.eth.getBlockNumber();
     }
 
     /**
@@ -57,7 +57,7 @@ class Methods {
      * @returns {Object}
      */
     getTransaction(hash) {
-        return this.web3Provider.getTransaction(hash);
+        return this.web3Provider.eth.getTransaction(hash);
     }
 
     /**
@@ -65,7 +65,7 @@ class Methods {
      * @returns {Object}
      */
     getTransactionReceipt(hash) {
-        return this.web3Provider.getTransactionReceipt(hash);
+        return this.web3Provider.eth.getTransactionReceipt(hash);
     }
 
     /**
@@ -73,7 +73,7 @@ class Methods {
      * @returns {Number}
      */
     async getBalance(address) {
-        return (await this.web3Provider.getBalance(address));
+        return (await this.web3Provider.eth.getBalance(address));
     }
     
 }

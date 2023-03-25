@@ -1,8 +1,5 @@
-const {ethers} = require('ethers');
+const Web3 = require('web3');
 const utils = require('./utils');
-const Coin = require('./entity/coin');
-const Token = require('./entity/token');
-const Transaction = require('./entity/transaction');
 const getAdapter = require('./get-adapter');
 
 class Wallet {
@@ -152,7 +149,7 @@ class Wallet {
                 let chainHexId = await this.getChainHexId();
                 if (this.provider.network.hexId == chainHexId) {
                     this.provider.setConnectedWallet(this);
-                    this.provider.setWeb3Provider(new ethers.providers.Web3Provider(this.wallet));
+                    this.provider.setWeb3Provider(new Web3(this.wallet));
 
                     this.connectedAccount = connectedAccount;
                     this.connectedNetwork = this.provider.network;;

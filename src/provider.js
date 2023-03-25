@@ -1,4 +1,4 @@
-const {ethers} = require('ethers');
+const Web3 = require('web3');
 const Coin = require('./entity/coin');
 const Token = require('./entity/token');
 const Contract = require('./entity/contract');
@@ -58,7 +58,7 @@ class Provider {
         }
 
         if (typeof window == 'undefined') {
-            this.setWeb3Provider(new ethers.providers.JsonRpcProvider(this.network.rpcUrl));
+            this.setWeb3Provider(new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
         }
 
         this.detectWallets();
