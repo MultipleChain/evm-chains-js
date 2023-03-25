@@ -9,11 +9,6 @@ class Provider {
     /**
      * @var {Object}
      */
-    ethers;
-
-    /**
-     * @var {Object}
-     */
     methods;
 
     /**
@@ -63,20 +58,18 @@ class Provider {
         }
 
         if (typeof window == 'undefined') {
-            this.setEthersProvider(new ethers.providers.JsonRpcProvider(this.network.rpcUrl));
+            this.setWeb3Provider(new ethers.providers.JsonRpcProvider(this.network.rpcUrl));
         }
 
         this.detectWallets();
     }
 
     /**
-     * @param {Object} ethersProvider 
+     * @param {Object} web3Provider 
      */
-    setEthersProvider(ethersProvider) {
-        this.ethers = ethers;
-        this.ethers.currentProvider = ethersProvider;
+    setWeb3Provider(web3Provider) {
         let Methods = require('./methods');
-        this.methods = new Methods(this);
+        this.methods = new Methods(this, web3Provider);
     }
 
     /**

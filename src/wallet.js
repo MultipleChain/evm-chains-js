@@ -152,7 +152,7 @@ class Wallet {
                 let chainHexId = await this.getChainHexId();
                 if (this.provider.network.hexId == chainHexId) {
                     this.provider.setConnectedWallet(this);
-                    this.provider.setEthersProvider(new ethers.providers.Web3Provider(this.wallet));
+                    this.provider.setWeb3Provider(new ethers.providers.Web3Provider(this.wallet));
 
                     this.connectedAccount = connectedAccount;
                     this.connectedNetwork = this.provider.network;;

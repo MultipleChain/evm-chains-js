@@ -10,14 +10,15 @@ class Methods {
     /**
      * @var {Object}
      */
-    ethersProvider;
+    web3Provider;
 
     /**
      * @param {Object} provider 
+     * @param {Object} web3Provider
      */
-    constructor(provider) {
+    constructor(provider, web3Provider) {
         this.provider = provider;
-        this.ethersProvider = provider.ethers.currentProvider;
+        this.web3Provider = web3Provider
     }
 
     /**
@@ -26,7 +27,7 @@ class Methods {
      * @returns {Object}
      */
     contract(address, abi) {
-        return new this.provider.ethers.Contract(address, abi, this.ethersProvider);
+        return new this.provider.ethers.Contract(address, abi, this.web3Provider);
     }
 
     /**
@@ -34,21 +35,21 @@ class Methods {
      * @returns {String}
      */
     async getEstimateGas(data) {
-        return utils.hex((await this.ethersProvider.estimateGas(data)).toString());
+        return utils.hex((await this.web3Provider.estimateGas(data)).toString());
     }
 
     /**
      * @returns {String}
      */
     async getGasPrice() {
-        return utils.hex((await this.ethersProvider.getGasPrice()).toString());
+        return utils.hex((await this.web3Provider.getGasPrice()).toString());
     }
     
     /**
      * @returns {Number}
      */
     getBlockNumber() {
-        return this.ethersProvider.getBlockNumber();
+        return this.web3Provider.getBlockNumber();
     }
 
     /**
@@ -56,7 +57,7 @@ class Methods {
      * @returns {Object}
      */
     getTransaction(hash) {
-        return this.ethersProvider.getTransaction(hash);
+        return this.web3Provider.getTransaction(hash);
     }
 
     /**
@@ -64,7 +65,7 @@ class Methods {
      * @returns {Object}
      */
     getTransactionReceipt(hash) {
-        return this.ethersProvider.getTransactionReceipt(hash);
+        return this.web3Provider.getTransactionReceipt(hash);
     }
 
     /**
@@ -72,7 +73,7 @@ class Methods {
      * @returns {Number}
      */
     async getBalance(address) {
-        return (await this.ethersProvider.getBalance(address));
+        return (await this.web3Provider.getBalance(address));
     }
     
 }
