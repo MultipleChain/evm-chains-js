@@ -1,7 +1,7 @@
 module.exports = trustWallet = (provider) => {
     const wallet = window.ethereum;
     const testnet = provider.testnet
-    const switcher = require('./switcher.js')(provider, provider);
+    const switcher = require('./switcher.js')(wallet, provider);
 
     const connect = async () => {
         return new Promise(async (resolve, reject) => {
