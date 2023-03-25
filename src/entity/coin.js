@@ -67,6 +67,7 @@ class Coin {
 
             amount = utils.toHex(amount, this.decimals);
             
+            let gasPrice = await this.provider.methods.getGasPrice();
             let gas = await this.provider.methods.getEstimateGas({
                 to,
                 from,
@@ -77,6 +78,7 @@ class Coin {
                 to,
                 from,
                 value: amount,
+                gasPrice,
                 gas
             }]);
         });

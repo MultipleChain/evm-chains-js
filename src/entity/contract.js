@@ -1,3 +1,5 @@
+const utils = require('../utils');
+
 class Contract {
 
     /**
@@ -16,6 +18,11 @@ class Contract {
     contract;
 
     /**
+     * @var {Object}
+     */
+    methods;
+
+    /**
      * @var {Number}
      */
     defaultGas = 50000;
@@ -29,6 +36,7 @@ class Contract {
         this.address = address;
         this.provider = provider;
         this.contract = provider.methods.contract(address, abi);
+        this.methods = this.contract.methods;
     }
 
     /**
@@ -44,16 +52,21 @@ class Contract {
      * @returns {String}
      */
     getData(method, ...data) {
-        return this.contract[method].getData(...data);
+        return this.methods[method](...data).encodeABI();
     }
 
     /**
-     * @param {String} method 
-     * @param  {...any} params 
-     * @returns {Promise}
+     * @param {String} method
+     * @param  {...any} data 
+     * @returns {String}
      */
-    call(method, ...params) {
-        return this.contract[method](...params);
+    async getEstimateGas(method, ...data) {
+        let ops = {};
+        if (data.length > 0) {
+            ops = data[data.length - 1];
+            data.splice(data.length - 1, 1)
+        }
+        return utils.hex((await this.methods[method](...data).estimateGas(ops)));
     }
 }
 
