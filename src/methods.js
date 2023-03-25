@@ -27,7 +27,7 @@ class Methods {
      * @returns {Object}
      */
     contract(address, abi) {
-        return new web3Provider.eth.Contract(abi, address);
+        return new this.web3Provider.eth.Contract(abi, address);
     }
 
     /**
