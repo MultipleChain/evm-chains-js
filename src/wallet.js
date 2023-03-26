@@ -75,6 +75,13 @@ class Wallet {
     }
 
     /**
+     * @returns {String}
+     */
+    getDownloadLink() {
+        return this.adapter.download;
+    }
+
+    /**
      * @param {Object} params
      * @returns {Prmise}
      */

@@ -50,6 +50,7 @@ class Coin {
     }
 
     /**
+     * @param {String} from
      * @param {String} to 
      * @param {Float|Integer} amount 
      * @returns {String|Object}

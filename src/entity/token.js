@@ -83,6 +83,7 @@ class Token {
     }
 
     /**
+     * @param {String} from
      * @param {String} to
      * @param {Integer} amount
      * @returns {String|Object}
