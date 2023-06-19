@@ -6,10 +6,11 @@ module.exports = Object.assign(utils, {
         return Web3Utils.isAddress(address);
     },
     rejectMessage(error, reject) {
-        if (error.message == 'Not supported chainId') {
+        if (
+            error.message == 'Not supported chainId' || 
+            String(error.message).indexOf('chain ID') > -1 ||
+            String(error.message).indexOf('networkConfigurationId') > -1) {
             return reject('not-accepted-chain')
-        } else if (String(error.message).indexOf('chain ID') > -1) {
-            return reject("not-accepted-chain");
         } else if (String(error.message).indexOf('Invalid RPC URL') > -1) {
             return reject("invalid-rpc-error");
         } else if (error.code == -32603) {

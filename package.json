@@ -1,7 +1,7 @@
 {
   "namespace": "multiplechain",
   "name": "@multiplechain/evm-chains",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "A library that makes it easy to connect to EVM-based wallets and make transactions quickly.",
   "scripts": {
     "serve": "parcel test.html --no-cache --dist-dir test",
@@ -12,7 +12,7 @@
     "dist",
     "resources"
   ],
-  "main": "dist/provider.js",
+  "main": "dist/evm-chains-provider.js",
   "types": "index.d.ts",
   "typings": "index.d.ts",
   "prepublishOnly": "npm run build",
@@ -32,11 +32,13 @@
   },
   "homepage": "https://github.com/MultipleChain/evm-chains-js",
   "dependencies": {
+    "@moralisweb3/common-evm-utils": "^2.22.2",
     "@multiplechain/evm-based-chains": "^0.1.0",
     "@multiplechain/utils": "^0.1.1",
     "@walletconnect/web3-provider": "^1.7.8",
     "abi-decoder": "^2.4.0",
     "bignumber.js": "^9.0.2",
+    "moralis": "^2.22.2",
     "os": "^0.1.2",
     "web3": "^1.9.0"
   },

@@ -1,8 +1,11 @@
 const Web3 = require('web3');
+const utils = require('./utils');
 const Coin = require('./entity/coin');
 const Token = require('./entity/token');
+const Moralis = require("moralis").default;
 const Contract = require('./entity/contract');
 const Transaction = require('./entity/transaction');
+const { EvmChain } = require("@moralisweb3/common-evm-utils");
 
 class Provider {
 
@@ -20,6 +23,11 @@ class Provider {
      * @var {String}
      */
     infuraId = null;
+    
+    /**
+     * @var {String}
+     */
+    moralisApiKey = null;
 
     /**
      * @var {Object}
@@ -40,11 +48,13 @@ class Provider {
      * @param {Object} network 
      * @param {Boolean} testnet 
      * @param {String} infuraId 
+     * @param {String} moralisApiKey
      */
-    constructor(network, testnet = false, infuraId = null) {
+    constructor(network, testnet = false, infuraId = null, moralisApiKey = null) {
 
         this.testnet = testnet;
         this.infuraId = infuraId;
+        this.moralisApiKey = moralisApiKey;
 
         let networks = require('@multiplechain/evm-based-chains');
         networks = testnet ? networks.testnets : networks.mainnets;
@@ -57,11 +67,50 @@ class Provider {
             throw new Error('Network not found!');
         }
 
-        if (typeof window == 'undefined') {
-            this.setWeb3Provider(new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
-        }
+        this.setWeb3Provider(new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
 
         this.detectWallets();
+    }
+
+    /**
+     * @param {String} receiver 
+     * @param {Number} amount
+     * @returns {Object}
+     */
+    async getLastTransactionByReceiver(receiver,  tokenAddress) {
+        await Moralis.start({
+            apiKey: this.moralisApiKey,
+        });
+
+        let response = await Moralis.EvmApi.transaction.getWalletTransactions({
+            limit: 1,
+            address: receiver,
+            chain: EvmChain.create(this.network.id)
+        });
+        
+        let tx = response.toJSON().result[0];
+
+        if (!tx) {
+            return {
+                hash: null,
+                amount: 0
+            }
+        }
+
+        let amount;
+        if (tokenAddress) {
+            tx = this.Transaction(tx.hash);
+            let data = tx.decodeInput();
+            let token = this.Token(address);
+            amount = utils.toDec(data.amount, (await token.getDecimals()));
+        } else {
+            amount = utils.toDec(tx.value, (await this.Coin().getDecimals()));
+        }
+
+        return {
+            hash: tx.hash,
+            amount
+        };
     }
 
     /**
