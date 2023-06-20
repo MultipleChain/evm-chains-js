@@ -30,6 +30,11 @@ class Provider {
     moralisApiKey = null;
 
     /**
+     * @var {Boolean}
+     */
+    moralisStarted = false;
+
+    /**
      * @var {Object}
      */
     network = {};
@@ -73,14 +78,27 @@ class Provider {
     }
 
     /**
+     * @returns {Promise<void>}
+     */
+    async startMoralis() {
+        if (this.moralisStarted) {
+            return this.moralisStarted;
+        }
+
+        await Moralis.start({
+            apiKey: this.moralisApiKey,
+        });
+
+        return this.moralisStarted = true;
+    }
+
+    /**
      * @param {String} receiver 
      * @param {Number} amount
      * @returns {Object}
      */
     async getLastTransactionByReceiver(receiver,  tokenAddress) {
-        await Moralis.start({
-            apiKey: this.moralisApiKey,
-        });
+        await this.startMoralis();
 
         let response = await Moralis.EvmApi.transaction.getWalletTransactions({
             limit: 1,
