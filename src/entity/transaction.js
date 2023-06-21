@@ -218,7 +218,7 @@ class Transaction {
         }
 
         if (await this.verifyTokenTransfer(address)) {
-            let decodedInput = this.decodeInput();
+            let decodedInput = await this.decodeInput();
             let token = this.provider.Token(address);
 
             let data = {
