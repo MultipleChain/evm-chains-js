@@ -74,7 +74,10 @@ class Transaction {
     /**
      * @returns {Object}
      */
-    decodeInput() {
+    async decodeInput() {
+        if (!this.data) {
+            await this.getData();
+        }
         if (this.data.input != '0x') {
             let decodedInput = utils.abiDecoder(this.data.input);
             let receiver = decodedInput.params[0].value;

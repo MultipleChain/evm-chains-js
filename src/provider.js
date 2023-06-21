@@ -97,36 +97,43 @@ class Provider {
      * @param {Number} amount
      * @returns {Object}
      */
-    async getLastTransactionByReceiver(receiver,  tokenAddress) {
+    async getLastTransactionByReceiver(receiver, tokenAddress) {
         await this.startMoralis();
-
-        let response = await Moralis.EvmApi.transaction.getWalletTransactions({
-            limit: 1,
-            address: receiver,
-            chain: EvmChain.create(this.network.id)
-        });
-        
-        let tx = response.toJSON().result[0];
-
-        if (!tx) {
-            return {
-                hash: null,
-                amount: 0
-            }
-        }
-
-        let amount;
+        let amount, hash;
         if (tokenAddress) {
-            tx = this.Transaction(tx.hash);
-            let data = tx.decodeInput();
-            let token = this.Token(address);
-            amount = utils.toDec(data.amount, (await token.getDecimals()));
+            let response = await Moralis.EvmApi.transaction.getWalletTransactions({
+                limit: 1,
+                address: tokenAddress,
+                chain: EvmChain.create(this.network.id)
+            });
+            
+            let tx = response.toJSON().result[0];
+            hash = tx.hash;
+            let data = utils.abiDecoder(tx.input);
+            if (data.name == 'transfer') {
+                amount = data.params[1].value;
+                let token = this.Token(tokenAddress);
+                amount = utils.toDec(amount, (await token.getDecimals()));
+            } else {
+                return {
+                    hash: tx.hash,
+                    amount: 0
+                }
+            }
         } else {
+            let response = await Moralis.EvmApi.transaction.getWalletTransactions({
+                limit: 1,
+                address: receiver,
+                chain: EvmChain.create(this.network.id)
+            });
+            
+            let tx = response.toJSON().result[0];
+            hash = tx.hash;
             amount = utils.toDec(tx.value, (await this.Coin().getDecimals()));
         }
 
         return {
-            hash: tx.hash,
+            hash,
             amount
         };
     }
