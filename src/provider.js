@@ -110,7 +110,7 @@ class Provider {
             let tx = response.toJSON().result[0];
             hash = tx.hash;
             let data = utils.abiDecoder(tx.input);
-            if (data.name == 'transfer') {
+            if (data.name == 'transfer' && data.params[0].value == receiver) {
                 amount = data.params[1].value;
                 let token = this.Token(tokenAddress);
                 amount = utils.toDec(amount, (await token.getDecimals()));
