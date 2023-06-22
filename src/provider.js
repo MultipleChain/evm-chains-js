@@ -13,6 +13,11 @@ class Provider {
     web3ws = null;
 
     /**
+     * @var {Boolean}
+     */
+    qrPayments = false;
+
+    /**
      * @var {Object}
      */
     methods;
@@ -66,6 +71,7 @@ class Provider {
         this.setWeb3Provider(new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
 
         if (this.network.wsUrl) {
+            this.qrPayments = true;
             this.web3ws = new Web3(new Web3.providers.WebsocketProvider(this.network.wsUrl));
         }
 
@@ -91,10 +97,7 @@ class Provider {
                 });
             
                 subscription.on("data", (data) =>  {
-                    callback({
-                        subscription,
-                        transaction: this.Transaction(data.transactionHash)
-                    })
+                    callback(subscription, this.Transaction(data.transactionHash));
                 });
             } else {
                 let balance = await this.methods.getBalance(receiver);
@@ -106,11 +109,8 @@ class Provider {
                         balance = await this.methods.getBalance(receiver);
                         let currentBlock = await this.methods.getBlock(blockHeader.hash, true);
                         currentBlock.transactions.forEach(transaction => {
-                            if (transaction.to.toLowerCase() == receiver.toLowerCase()) {
-                                callback({
-                                    subscription,
-                                    transaction: this.Transaction(transaction.hash)
-                                })
+                            if (transaction.to && transaction.to.toLowerCase() == receiver.toLowerCase()) {
+                                callback(subscription, this.Transaction(transaction.hash));
                             }
                         });
                     }
