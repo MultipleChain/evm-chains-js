@@ -89,6 +89,20 @@ class Transaction {
     }
 
     /**
+     * @param {String} tokenAddress 
+     * @returns {Number}
+     */
+    async getTransferAmount(tokenAddress = null) {
+        let data = await this.getData();
+        if (tokenAddress) {
+            let decodedInput = await this.decodeInput();
+            return utils.toDec(decodedInput.amount, (await this.provider.Token(tokenAddress).getDecimals()));
+        } else {
+            return utils.toDec(data.value, (await this.provider.Coin().getDecimals()));
+        }
+    }
+
+    /**
      * @returns {Number}
      */
     async getConfirmations() {

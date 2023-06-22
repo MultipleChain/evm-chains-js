@@ -32,13 +32,11 @@
   },
   "homepage": "https://github.com/MultipleChain/evm-chains-js",
   "dependencies": {
-    "@moralisweb3/common-evm-utils": "^2.22.2",
     "@multiplechain/evm-based-chains": "^0.1.2",
     "@multiplechain/utils": "^0.1.1",
     "@walletconnect/web3-provider": "^1.7.8",
     "abi-decoder": "^2.4.0",
     "bignumber.js": "^9.0.2",
-    "moralis": "^2.22.2",
     "os": "^0.1.2",
     "web3": "^1.9.0"
   },

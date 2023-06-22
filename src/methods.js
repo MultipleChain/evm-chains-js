@@ -46,6 +46,14 @@ class Methods {
     }
     
     /**
+     * @param ...args
+     * @returns {Object}
+     */
+    getBlock(...args) {
+        return this.web3Provider.eth.getBlock(...args);
+    }
+    
+    /**
      * @returns {Number}
      */
     getBlockNumber() {

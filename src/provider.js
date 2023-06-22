@@ -2,12 +2,15 @@ const Web3 = require('web3');
 const utils = require('./utils');
 const Coin = require('./entity/coin');
 const Token = require('./entity/token');
-const Moralis = require("moralis").default;
 const Contract = require('./entity/contract');
 const Transaction = require('./entity/transaction');
-const { EvmChain } = require("@moralisweb3/common-evm-utils");
 
 class Provider {
+
+    /**
+     * @var {Object}
+     */
+    web3ws = null;
 
     /**
      * @var {Object}
@@ -23,16 +26,6 @@ class Provider {
      * @var {String}
      */
     infuraId = null;
-    
-    /**
-     * @var {String}
-     */
-    moralisApiKey = null;
-
-    /**
-     * @var {Boolean}
-     */
-    moralisStarted = false;
 
     /**
      * @var {Object}
@@ -53,13 +46,11 @@ class Provider {
      * @param {Object} network 
      * @param {Boolean} testnet 
      * @param {String} infuraId 
-     * @param {String} moralisApiKey
      */
-    constructor(network, testnet = false, infuraId = null, moralisApiKey = null) {
+    constructor(network, testnet = false, infuraId = null) {
 
         this.testnet = testnet;
         this.infuraId = infuraId;
-        this.moralisApiKey = moralisApiKey;
 
         let networks = require('@multiplechain/evm-based-chains');
         networks = testnet ? networks.testnets : networks.mainnets;
@@ -74,70 +65,60 @@ class Provider {
 
         this.setWeb3Provider(new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
 
-        this.detectWallets();
-    }
-
-    /**
-     * @returns {Promise<void>}
-     */
-    async startMoralis() {
-        if (this.moralisStarted) {
-            return this.moralisStarted;
+        if (this.network.wsUrl) {
+            this.web3ws = new Web3(new Web3.providers.WebsocketProvider(this.network.wsUrl));
         }
 
-        await Moralis.start({
-            apiKey: this.moralisApiKey,
-        });
 
-        return this.moralisStarted = true;
+        this.detectWallets();
     }
 
     /**
      * @param {String} receiver 
      * @param {Number} amount
+     * @param {Function} callback
      * @returns {Object}
      */
-    async getLastTransactionByReceiver(receiver, tokenAddress) {
-        await this.startMoralis();
-        let amount, hash;
-        if (tokenAddress) {
-            let response = await Moralis.EvmApi.transaction.getWalletTransactions({
-                limit: 1,
-                address: tokenAddress,
-                chain: EvmChain.create(this.network.id)
-            });
+    async listenTransactions(receiver, tokenAddress, callback) {
+        if (this.web3ws) {
+            if (tokenAddress) {
+                receiver = receiver.replace('0x', '');
+                receiver = receiver.toLowerCase();
+                receiver = "0x000000000000000000000000" + receiver;
+                let subscription = this.web3ws.eth.subscribe('logs', {
+                    address: tokenAddress,
+                    topics: [null, null, receiver]
+                });
             
-            let tx = response.toJSON().result[0];
-            hash = tx.hash;
-            let data = utils.abiDecoder(tx.input);
-            if (
-                data.name == 'transfer' && 
-                String(data.params[0].value).toLowerCase() == receiver.toLowerCase()
-            ) {
-                let token = this.Token(tokenAddress);
-                amount = utils.toDec(data.params[1].value, (await token.getDecimals()));
+                subscription.on("data", (data) =>  {
+                    callback({
+                        subscription,
+                        transaction: this.Transaction(data.transactionHash)
+                    })
+                });
             } else {
-                return {
-                    hash: tx.hash,
-                    amount: 0
-                }
+                let balance = await this.methods.getBalance(receiver);
+                let subscription = this.web3ws.eth.subscribe('newBlockHeaders');
+
+                subscription.on("data", async (blockHeader) => {
+                    let newbalance = await this.methods.getBalance(receiver);
+                    if (balance < newbalance) {
+                        balance = await this.methods.getBalance(receiver);
+                        let currentBlock = await this.methods.getBlock(blockHeader.hash, true);
+                        currentBlock.transactions.forEach(transaction => {
+                            if (transaction.to.toLowerCase() == receiver.toLowerCase()) {
+                                callback({
+                                    subscription,
+                                    transaction: this.Transaction(transaction.hash)
+                                })
+                            }
+                        });
+                    }
+                });
             }
         } else {
-            let response = await Moralis.EvmApi.transaction.getWalletTransactions({
-                limit: 1,
-                address: receiver,
-                chain: EvmChain.create(this.network.id)
-            });
-            
-            let tx = response.toJSON().result[0];
-            hash = tx.hash;
-            amount = utils.toDec(tx.value, (await this.Coin().getDecimals()));
+            throw new Error('Websocket provider not found!');
         }
-
-        return {
-            hash,
-            amount
-        };
     }
 
     /**
