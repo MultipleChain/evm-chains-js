@@ -80,12 +80,13 @@ class Provider {
     }
 
     /**
-     * @param {String} receiver 
-     * @param {Number} amount
+     * @param {Object} options
      * @param {Function} callback
      * @returns {Object}
      */
-    async listenTransactions(receiver, tokenAddress, callback) {
+    async listenTransactions(options, callback) {
+        let receiver = options.receiver;
+        let tokenAddress = options.tokenAddress;
         if (this.web3ws) {
             if (tokenAddress) {
                 receiver = receiver.replace('0x', '');
