@@ -57,12 +57,12 @@ class Provider {
         this.infuraApiKey = options.infuraApiKey;
 
         let networks = require('@multiplechain/evm-based-chains');
-        networks = testnet ? networks.testnets : networks.mainnets;
+        networks = this.testnet ? networks.testnets : networks.mainnets;
 
-        if (typeof network == 'object') {
-            this.network = network;
-        } else if (networks[network]) {
-            this.network = networks[network];
+        if (typeof this.network == 'object') {
+            this.network = this.network;
+        } else if (networks[this.network]) {
+            this.network = networks[this.network];
         } else {
             throw new Error('Network not found!');
         }
