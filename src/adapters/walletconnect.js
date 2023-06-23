@@ -1,6 +1,6 @@
 module.exports = walletConnect = (provider) => {
     const network = provider.network;
-    const infuraId = provider.infuraId;
+    const infuraId = provider.infuraApiKey;
     const WalletConnectProvider = require('@walletconnect/web3-provider').default;
 
     // function isLocalHost() {

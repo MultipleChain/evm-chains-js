@@ -30,7 +30,7 @@ class Provider {
     /**
      * @var {String}
      */
-    infuraId = null;
+    infuraApiKey = null;
 
     /**
      * @var {Object}
@@ -48,14 +48,13 @@ class Provider {
     connectedWallet = {};
 
     /**
-     * @param {Object} network 
-     * @param {Boolean} testnet 
-     * @param {String} infuraId 
+     * @param {Object} options
      */
-    constructor(network, testnet = false, infuraId = null) {
+    constructor(options) {
 
-        this.testnet = testnet;
-        this.infuraId = infuraId;
+        this.network = options.network;
+        this.testnet = options.testnet;
+        this.infuraApiKey = options.infuraApiKey;
 
         let networks = require('@multiplechain/evm-based-chains');
         networks = testnet ? networks.testnets : networks.mainnets;
@@ -186,7 +185,7 @@ class Provider {
                 this.detectedWallets['binancewallet'] = new Wallet('binancewallet', this);
             }
 
-            if (this.infuraId) {
+            if (this.infuraApiKey) {
                 this.detectedWallets['walletconnect'] = new Wallet('walletconnect', this);
             }
         }
