@@ -7,15 +7,15 @@ module.exports = trustWallet = (provider) => {
         return new Promise(async (resolve, reject) => {
             try {
                 wallet.request({ method: 'eth_requestAccounts' })
-                .then(async (accounts) => {
+                .then(async () => {
 
                     if (testnet) {
-                        return resolve(accounts[0]);
+                        return resolve(wallet);
                     }
 
                     switcher.maybeSwitch()
                     .then(() => {
-                        resolve(accounts[0]);
+                        resolve(wallet);
                     })
                     .catch((error) => {
                         reject(error);
@@ -34,7 +34,6 @@ module.exports = trustWallet = (provider) => {
         key: 'trustwallet',
         name: 'Trust Wallet',
         type: 'mobile',
-        wallet,
         connect,
         deepLink: "https://link.trustwallet.com/open_url?coin_id=60&url=",
         download: 'https://trustwallet.com/download'

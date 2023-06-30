@@ -13,6 +13,9 @@ module.exports = {
         umdNamedDefine: true,
     },
     plugins: [
+        new webpack.optimize.LimitChunkCountPlugin({
+            maxChunks: 1, // disable creating additional chunks
+        }),
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
         }),

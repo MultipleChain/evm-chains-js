@@ -43,7 +43,15 @@ class Wallet {
      */
     setAdapter(adapter) {
         this.adapter = getAdapter(adapter, this.provider);
-        this.wallet = this.adapter.wallet;
+    }
+
+    getProperty(property) {
+
+        if (!this.adapter) {
+            this.setAdapter
+        }
+
+        return this.adapter[property];
     }
 
     /**
@@ -118,11 +126,8 @@ class Wallet {
      */
     connect() {
         return new Promise((resolve, reject) => {
-
             let timer;
-            if (this.getKey() == 'walletconnect') {
-                this.setAdapter(this.getKey());
-            } else {
+            if (this.getKey() != 'walletconnect') {
                 let time = 0;
                 let timeout = 15;
                 timer = setInterval(async () => {
@@ -152,15 +157,16 @@ class Wallet {
     connection() {
         return new Promise((resolve, reject) => {
             this.adapter.connect()
-            .then(async connectedAccount => {
+            .then(async wallet => {
+                this.wallet = wallet;
                 let chainHexId = await this.getChainHexId();
                 if (this.provider.network.hexId == chainHexId) {
                     this.provider.setConnectedWallet(this);
                     this.provider.setWeb3Provider(new Web3(this.wallet));
 
-                    this.connectedAccount = connectedAccount;
-                    this.connectedNetwork = this.provider.network;;
-                    resolve(connectedAccount);
+                    this.connectedAccount = (await this.getAccounts())[0];
+                    this.connectedNetwork = this.provider.network;
+                    resolve(this.connectedAccount);
                 } else {
                     reject('not-accepted-chain');
                 }

@@ -7,10 +7,10 @@ module.exports = metaMask = (provider) => {
         return new Promise(async (resolve, reject) => {
             try {
                 wallet.request({ method: 'eth_requestAccounts' })
-                .then(async (accounts) => {
+                .then(async () => {
                     switcher.maybeSwitch()
                     .then(() => {
-                        resolve(accounts[0]);
+                        resolve(wallet);
                     })
                     .catch((error) => {
                         reject(error);
@@ -29,7 +29,6 @@ module.exports = metaMask = (provider) => {
         key: 'metamask',
         name: 'MetaMask',
         type: 'browser',
-        wallet,
         connect,
         deepLink: 'https://provider.app.link/dapp/',
         download: 'https://metamask.io/download/'

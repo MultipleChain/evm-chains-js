@@ -4,8 +4,8 @@ module.exports = binanceWallet = () => {
         return new Promise(async (resolve, reject) => {
             try {
                 wallet.request({ method: 'eth_requestAccounts' })
-                .then((accounts) => {
-                    resolve(accounts[0]);
+                .then(() => {
+                    resolve(wallet);
                 })
                 .catch(error => {
                     reject(error);
@@ -20,7 +20,6 @@ module.exports = binanceWallet = () => {
         key: 'binancewallet',
         name: 'Binance Wallet',
         type: 'browser',
-        wallet,
         connect,
         download: 'https://chrome.google.com/webstore/detail/binance-wallet/fhbohimaelbohpjbbldcngcnapndodjp'
     }
