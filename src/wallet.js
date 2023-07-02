@@ -45,15 +45,6 @@ class Wallet {
         this.adapter = getAdapter(adapter, this.provider);
     }
 
-    getProperty(property) {
-
-        if (!this.adapter) {
-            this.setAdapter
-        }
-
-        return this.adapter[property];
-    }
-
     /**
      * @returns {String}
      */
