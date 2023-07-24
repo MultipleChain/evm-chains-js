@@ -101,14 +101,12 @@ class Token {
 
             amount = utils.toHex(amount, (await this.getDecimals()));
 
-            let gasPrice = await this.provider.methods.getGasPrice();
             let data = await this.contract.getData('transfer', to, amount);
             let gas = await this.contract.getEstimateGas('transfer', to, amount, {from});
 
             return resolve([{
                 to: this.address,
                 value: '0x0',
-                gasPrice,
                 from,
                 gas,
                 data
