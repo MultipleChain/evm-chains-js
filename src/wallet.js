@@ -125,9 +125,9 @@ class Wallet {
     connect() {
         return new Promise((resolve, reject) => {
             let timer;
-            if (this.getKey() != 'walletconnect') {
+            if (this.getKey() == 'binancewallet') {
                 let time = 0;
-                let timeout = 15;
+                let timeout = 20;
                 timer = setInterval(async () => {
                     time += 1;
                     if (time > timeout) {
