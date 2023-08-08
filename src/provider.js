@@ -158,12 +158,35 @@ class Provider {
     }
 
     /**
-     * @param {Array} filter 
+     * @param {Array|null} filter 
+     * @returns {Array}
+     */
+    getSupportedWallets(filter) {
+
+        const Wallet = require('./wallet');
+        
+        const wallets  = {
+            metamask: new Wallet('metamask', this),
+            trustwallet: new Wallet('trustwallet', this),
+            binancewallet: new Wallet('binancewallet', this),
+        };
+
+        if (this.wcProjectId) {
+            wallets['walletconnect'] = new Wallet('walletconnect', this);
+        }
+
+        return Object.fromEntries(Object.entries(wallets).filter(([key]) => {
+            return !filter ? true : filter.includes(key);
+        }));
+    }
+
+    /**
+     * @param {Array|null} filter 
      * @returns {Array}
      */
     getDetectedWallets(filter) {
         return Object.fromEntries(Object.entries(this.detectedWallets).filter(([key]) => {
-            return filter.includes(key);
+            return !filter ? true : filter.includes(key);
         }));
     }
 

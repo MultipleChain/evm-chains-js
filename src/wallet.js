@@ -62,8 +62,8 @@ class Wallet {
     /**
      * @returns {String}
      */
-    getType() {
-        return this.adapter.type;
+    getSupports() {
+        return this.adapter.supports;
     }
 
     /**
@@ -78,6 +78,13 @@ class Wallet {
      */
     getDownloadLink() {
         return this.adapter.download;
+    }
+
+    /**
+     * @returns {Boolean}
+     */
+    isDetected() {
+        return this.adapter.detected;
     }
 
     /**

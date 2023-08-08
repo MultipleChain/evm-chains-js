@@ -33,9 +33,12 @@ module.exports = trustWallet = (provider) => {
     return {
         key: 'trustwallet',
         name: 'Trust Wallet',
-        type: 'mobile',
+        supports: [
+            'browser',
+            'mobile'
+        ],
         connect,
-        deepLink: "https://link.trustwallet.com/open_url?coin_id=60&url=",
-        download: 'https://trustwallet.com/download'
+        download: 'https://trustwallet.com/download',
+        detected : Boolean(typeof wallet != 'undefined' && wallet.isTrust)
     }
 }

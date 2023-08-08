@@ -4,6 +4,8 @@ const removeConnection = () => {
     .forEach(x => localStorage.removeItem(x))
 }
 
+removeConnection();
+
 module.exports = walletConnect = (provider) => {
     const network = provider.network;
     const projectId = provider.wcProjectId;
@@ -13,7 +15,6 @@ module.exports = walletConnect = (provider) => {
     rpcIdMapping[network.id] = network.rpcUrl;
 
     const connect = async () => {
-        removeConnection();
         let wallet = await EthereumProvider.init({
             projectId,
             chains: [network.id],
@@ -28,6 +29,7 @@ module.exports = walletConnect = (provider) => {
                 ],
             }
         });
+
         return new Promise(async (resolve, reject) => {
             wallet.enable()
             .then(() => {
@@ -44,7 +46,10 @@ module.exports = walletConnect = (provider) => {
     return {
         key: 'walletconnect',
         name: 'WalletConnect',
-        type: 'qr',
+        supports: [
+            'browser',
+            'mobile'
+        ],
         connect
     }
 }

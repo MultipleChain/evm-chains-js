@@ -19,8 +19,11 @@ module.exports = binanceWallet = () => {
     return {
         key: 'binancewallet',
         name: 'Binance Wallet',
-        type: 'browser',
+        supports: [
+            'browser'
+        ],
         connect,
-        download: 'https://chrome.google.com/webstore/detail/binance-wallet/fhbohimaelbohpjbbldcngcnapndodjp'
+        download: 'https://chrome.google.com/webstore/detail/binance-wallet/fhbohimaelbohpjbbldcngcnapndodjp',
+        detected : typeof wallet != 'undefined'
     }
 }

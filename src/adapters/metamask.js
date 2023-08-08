@@ -28,9 +28,13 @@ module.exports = metaMask = (provider) => {
     return {
         key: 'metamask',
         name: 'MetaMask',
-        type: 'browser',
+        supports: [
+            'browser',
+            'mobile'
+        ],
         connect,
-        deepLink: 'https://provider.app.link/dapp/',
-        download: 'https://metamask.io/download/'
+        deepLink: 'https://metamask.app.link/dapp/{siteUrl}',
+        download: 'https://metamask.io/download/',
+        detected : Boolean(typeof wallet != 'undefined' && wallet.isMetaMask)
     }
 }
