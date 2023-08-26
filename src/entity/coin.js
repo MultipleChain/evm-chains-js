@@ -71,14 +71,16 @@ class Coin {
             let gas = await this.provider.methods.getEstimateGas({
                 to,
                 from,
-                value: amount
+                value: amount,
+                data: "0x",
             });
 
             return resolve([{
                 to,
                 from,
                 value: amount,
-                gas
+                gas,
+                data: "0x",
             }]);
         });
     }
