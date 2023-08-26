@@ -9,7 +9,9 @@ module.exports = Object.assign(utils, {
         if (
             error.message == 'Not supported chainId' || 
             String(error.message).indexOf('chain ID') > -1 ||
-            String(error.message).indexOf('networkConfigurationId') > -1) {
+            String(error.message).indexOf('networkConfigurationId') > -1 ||
+            String(error.message).indexOf('disapproved requested chains') > -1
+        ) {
             return reject('not-accepted-chain')
         } else if (String(error.message).indexOf('Invalid RPC URL') > -1) {
             return reject("invalid-rpc-error");
