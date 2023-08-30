@@ -1,11 +1,3 @@
-const removeConnection = () => {
-    Object.keys(localStorage)
-    .filter(x => x.startsWith('wc@2'))
-    .forEach(x => localStorage.removeItem(x))
-}
-
-removeConnection();
-
 module.exports = walletConnect = (provider) => {
     const network = provider.network;
     const projectId = provider.wcProjectId;
@@ -50,6 +42,11 @@ module.exports = walletConnect = (provider) => {
             'browser',
             'mobile'
         ],
-        connect
+        connect,
+        removeOldConnection: () => {
+            Object.keys(localStorage)
+            .filter(x => x.startsWith('wc@2'))
+            .forEach(x => localStorage.removeItem(x))
+        },
     }
 }

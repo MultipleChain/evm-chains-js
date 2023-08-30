@@ -215,6 +215,14 @@ class Provider {
     }
 
     /**
+     * @param {String} ensDomain
+     * @returns 
+     */
+    getAddressFromEns(ensDomain) {
+        return this.methods.getAddressFromEns(ensDomain);
+    }
+
+    /**
      * @returns {Coin}
      */
     Coin() {
