@@ -2,7 +2,8 @@ const adapters = {
     metamask: require('./adapters/metamask'),
     binancewallet: require('./adapters/binancewallet'),
     trustwallet: require('./adapters/trustwallet'),
-    walletconnect: require('./adapters/walletconnect')
+    walletconnect: require('./adapters/walletconnect'),
+    phantom: require('./adapters/phantom')
 }
 
 /**

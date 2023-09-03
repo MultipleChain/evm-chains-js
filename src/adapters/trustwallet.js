@@ -1,4 +1,4 @@
-module.exports = trustWallet = (provider) => {
+module.exports = trustwallet = (provider) => {
     const wallet = window.ethereum;
     const testnet = provider.testnet
     const switcher = require('./switcher.js')(wallet, provider);

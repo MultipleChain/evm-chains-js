@@ -169,6 +169,7 @@ class Provider {
             metamask: new Wallet('metamask', this),
             trustwallet: new Wallet('trustwallet', this),
             binancewallet: new Wallet('binancewallet', this),
+            phantom: new Wallet('phantom', this),
         };
 
         if (this.wcProjectId) {
@@ -206,6 +207,10 @@ class Provider {
             
             if (window.BinanceChain) {
                 this.detectedWallets['binancewallet'] = new Wallet('binancewallet', this);
+            }
+            
+            if (window?.phantom?.ethereum?.isPhantom) {
+                this.detectedWallets['phantom'] = new Wallet('phantom', this);
             }
 
             if (this.wcProjectId) {
