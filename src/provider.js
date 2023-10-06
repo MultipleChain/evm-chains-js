@@ -33,6 +33,11 @@ class Provider {
     wcProjectId = null;
 
     /**
+     * @var {String}
+     */
+    wcThemeMode = 'light';
+
+    /**
      * @var {Object}
      */
     network = {};
@@ -55,6 +60,7 @@ class Provider {
         this.network = options.network;
         this.testnet = options.testnet;
         this.wcProjectId = options.wcProjectId;
+        this.wcThemeMode = options.wcThemeMode || 'light';
 
         let networks = require('@multiplechain/evm-based-chains');
         networks = this.testnet ? networks.testnets : networks.mainnets;
@@ -149,7 +155,7 @@ class Provider {
                     resolve(wallet);
                 })
                 .catch(error => {
-                    reject(error);
+                    utils.rejectMessage(error, reject);
                 });
             } else {
                 reject('wallet-not-found');

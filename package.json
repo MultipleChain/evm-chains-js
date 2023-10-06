@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/MultipleChain/evm-chains-js",
   "dependencies": {
-    "@multiplechain/evm-based-chains": "^0.1.4",
+    "@multiplechain/evm-based-chains": "^0.1.6",
     "@multiplechain/utils": "^0.1.1",
     "@walletconnect/ethereum-provider": "^2.8.6",
     "@walletconnect/modal": "^2.5.9",
