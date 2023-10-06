@@ -124,27 +124,11 @@ class Wallet {
      */
     connect() {
         return new Promise((resolve, reject) => {
-            let timer;
-            if (this.getKey() == 'binancewallet') {
-                let time = 0;
-                let timeout = 20;
-                timer = setInterval(async () => {
-                    time += 1;
-                    if (time > timeout) {
-                        clearInterval(timer);
-                        reject('timeout');
-                    }
-                }, 1000);
-            }
-
             this.connection().then((connectedAccount) => {
                 resolve(connectedAccount);
             })
             .catch((error) => {
                 utils.rejectMessage(error, reject);
-            })
-            .finally(() => {
-                clearInterval(timer);
             });
         });
     }
