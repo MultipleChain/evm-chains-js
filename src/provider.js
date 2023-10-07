@@ -201,14 +201,12 @@ class Provider {
         if (typeof window != 'undefined') {
             const Wallet = require('./wallet');
 
-            if (window.ethereum) {
-                if (window.ethereum.isMetaMask) {
-                    this.detectedWallets['metamask'] = new Wallet('metamask', this);
-                }
+            if (window?.ethereum?.isMetaMask) {
+                this.detectedWallets['metamask'] = new Wallet('metamask', this);
+            }
 
-                if (window.ethereum.isTrust) {
-                    this.detectedWallets['trustwallet'] = new Wallet('trustwallet', this);
-                }
+            if (window?.trustWallet?.isTrust) {
+                this.detectedWallets['trustwallet'] = new Wallet('trustwallet', this);
             }
             
             if (window.BinanceChain) {

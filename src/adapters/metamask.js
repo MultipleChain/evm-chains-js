@@ -1,4 +1,4 @@
-module.exports = metamask = (provider) => {
+module.exports = (provider) => {
     
     const wallet = window.ethereum;
     const switcher = require('./switcher.js')(wallet, provider);

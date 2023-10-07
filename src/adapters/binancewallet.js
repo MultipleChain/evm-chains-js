@@ -1,4 +1,4 @@
-module.exports = binancewallet = () => {
+module.exports = () => {
     const wallet = window.BinanceChain;
     const connect = async () => {
         return new Promise(async (resolve, reject) => {

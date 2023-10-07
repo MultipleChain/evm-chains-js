@@ -1,4 +1,4 @@
-module.exports = phantom = () => {
+module.exports = () => {
     
     const wallet = window.phantom.ethereum;
 

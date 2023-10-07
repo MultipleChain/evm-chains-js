@@ -1,4 +1,4 @@
-module.exports = switcher = (wallet, provider) => {
+module.exports = (wallet, provider) => {
     const network = provider.network;
     const {isNumeric, hex} = require('../utils.js');
 

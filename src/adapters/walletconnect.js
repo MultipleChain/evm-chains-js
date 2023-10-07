@@ -1,4 +1,4 @@
-module.exports = walletconnect = (provider) => {
+module.exports = (provider) => {
     const network = provider.network;
     const projectId = provider.wcProjectId;
     const { EthereumProvider } = require('@walletconnect/ethereum-provider');

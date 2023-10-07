@@ -1,5 +1,7 @@
-module.exports = trustwallet = (provider) => {
-    const wallet = window.ethereum;
+module.exports = (provider) => {
+
+    const wallet = window.trustWallet;
+
     const testnet = provider.testnet
     const switcher = require('./switcher.js')(wallet, provider);
 
@@ -39,6 +41,6 @@ module.exports = trustwallet = (provider) => {
         ],
         connect,
         download: 'https://trustwallet.com/download',
-        detected : Boolean(typeof wallet != 'undefined' && wallet.isTrust)
+        detected : Boolean(window?.trustWallet?.isTrust)
     }
 }
