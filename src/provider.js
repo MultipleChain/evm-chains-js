@@ -213,7 +213,7 @@ class Provider {
                 this.detectedWallets['binancewallet'] = new Wallet('binancewallet', this);
             }
             
-            if (window?.phantom?.ethereum?.isPhantom) {
+            if (window?.phantom?.ethereum) {
                 this.detectedWallets['phantom'] = new Wallet('phantom', this);
             }
 

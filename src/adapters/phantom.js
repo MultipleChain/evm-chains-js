@@ -28,6 +28,6 @@ module.exports = () => {
         connect,
         deepLink: 'https://phantom.app/ul/browse/{siteUrl}?ref={siteUrl}',
         download: 'https://phantom.app/',
-        detected: Boolean(window.phantom?.ethereum?.isPhantom)
+        detected: Boolean(window.phantom?.ethereum)
     }
 }
