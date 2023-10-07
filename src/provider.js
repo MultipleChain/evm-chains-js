@@ -205,7 +205,7 @@ class Provider {
                 this.detectedWallets['metamask'] = new Wallet('metamask', this);
             }
 
-            if (window?.trustWallet?.isTrust) {
+            if (window?.trustwallet) {
                 this.detectedWallets['trustwallet'] = new Wallet('trustwallet', this);
             }
             

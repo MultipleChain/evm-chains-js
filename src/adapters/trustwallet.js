@@ -1,6 +1,6 @@
 module.exports = (provider) => {
 
-    const wallet = window.trustWallet;
+    const wallet = window.trustwallet;
 
     const testnet = provider.testnet
     const switcher = require('./switcher.js')(wallet, provider);
@@ -41,6 +41,6 @@ module.exports = (provider) => {
         ],
         connect,
         download: 'https://trustwallet.com/download',
-        detected : Boolean(window?.trustWallet?.isTrust)
+        detected : Boolean(window?.trustwallet)
     }
 }
