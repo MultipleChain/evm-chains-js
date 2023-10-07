@@ -1,6 +1,6 @@
 module.exports = () => {
     
-    const wallet = window.phantom.ethereum;
+    const wallet = window?.phantom?.ethereum;
 
     const connect = async () => {
         return new Promise(async (resolve, reject) => {
