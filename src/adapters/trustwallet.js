@@ -1,9 +1,8 @@
+const switcher = require('./switcher.js');
+
 module.exports = (provider) => {
 
-    const wallet = window.trustwallet;
-
-    const testnet = provider.testnet
-    const switcher = require('./switcher.js')(wallet, provider);
+    const wallet = window?.ethereum?.isTrust ? window.ethereum : window.trustwallet;
 
     const connect = async () => {
         return new Promise(async (resolve, reject) => {
@@ -11,11 +10,11 @@ module.exports = (provider) => {
                 wallet.request({ method: 'eth_requestAccounts' })
                 .then(async () => {
 
-                    if (testnet) {
+                    if (window?.ethereum?.isTrust && provider.testnet) {
                         return resolve(wallet);
                     }
 
-                    switcher.maybeSwitch()
+                    switcher(wallet, provider)
                     .then(() => {
                         resolve(wallet);
                     })
@@ -41,6 +40,6 @@ module.exports = (provider) => {
         ],
         connect,
         download: 'https://trustwallet.com/download',
-        detected : Boolean(window?.trustwallet)
+        detected : Boolean(window?.ethereum?.isTrust || window?.trustwallet)
     }
 }

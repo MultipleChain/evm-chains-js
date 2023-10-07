@@ -205,11 +205,11 @@ class Provider {
                 this.detectedWallets['metamask'] = new Wallet('metamask', this);
             }
 
-            if (window?.trustwallet) {
+            if (window?.ethereum?.isTrust || window?.trustwallet) {
                 this.detectedWallets['trustwallet'] = new Wallet('trustwallet', this);
             }
             
-            if (window.BinanceChain) {
+            if (window?.BinanceChain?.bnbSign) {
                 this.detectedWallets['binancewallet'] = new Wallet('binancewallet', this);
             }
             

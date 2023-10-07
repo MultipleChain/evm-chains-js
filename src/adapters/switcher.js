@@ -2,7 +2,6 @@ module.exports = (wallet, provider) => {
     const network = provider.network;
     const {isNumeric, hex} = require('../utils.js');
 
-
     this.addNetwork = (network) => {
         return new Promise(async (resolve, reject) => {
             try {
@@ -83,5 +82,5 @@ module.exports = (wallet, provider) => {
         });
     }
 
-    return this;
+    return this.maybeSwitch(wallet, provider);
 }

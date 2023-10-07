@@ -1,14 +1,15 @@
+const switcher = require('./switcher.js');
+
 module.exports = (provider) => {
     
     const wallet = window.ethereum;
-    const switcher = require('./switcher.js')(wallet, provider);
 
     const connect = async () => {
         return new Promise(async (resolve, reject) => {
             try {
                 wallet.request({ method: 'eth_requestAccounts' })
                 .then(async () => {
-                    switcher.maybeSwitch()
+                    switcher(wallet, provider)
                     .then(() => {
                         resolve(wallet);
                     })
@@ -35,6 +36,6 @@ module.exports = (provider) => {
         connect,
         deepLink: 'https://metamask.app.link/dapp/{siteUrl}',
         download: 'https://metamask.io/download/',
-        detected : Boolean(typeof wallet != 'undefined' && wallet.isMetaMask)
+        detected : window?.ethereum?.isMetaMask
     }
 }
