@@ -31,6 +31,14 @@ class Methods {
     }
 
     /**
+     * @param {Array} abi 
+     * @returns {Object}
+     */
+    newContract(abi) {
+        return new this.web3Provider.eth.Contract(abi);
+    }
+
+    /**
      * @param {String} ens 
      * @returns 
      */

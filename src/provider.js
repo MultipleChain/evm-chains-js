@@ -1,5 +1,6 @@
 const Web3 = require('web3');
 const utils = require('./utils');
+const Methods = require('./methods');
 const Coin = require('./entity/coin');
 const Token = require('./entity/token');
 const Contract = require('./entity/contract');
@@ -18,7 +19,7 @@ class Provider {
     qrPayments = false;
 
     /**
-     * @var {Object}
+     * @var {Methods}
      */
     methods;
 
@@ -131,7 +132,6 @@ class Provider {
      * @param {Object} web3Provider 
      */
     setWeb3Provider(web3Provider) {
-        let Methods = require('./methods');
         this.methods = new Methods(this, web3Provider);
     }
 
@@ -257,6 +257,14 @@ class Provider {
     }
 
     /**
+     * @param {Array} abi 
+     * @returns {Contract}
+     */
+    newContract(abi) {
+        return this.methods.newContract(abi);
+    }
+
+    /**
      * @param {String} hash 
      * @returns {Transaction}
      */
@@ -264,5 +272,9 @@ class Provider {
         return new Transaction(hash, this);
     }
 }
+
+Provider.utils = utils;
+
+Provider.BigNumber = require('bignumber.js');
 
 module.exports = Provider;
