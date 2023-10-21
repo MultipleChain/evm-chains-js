@@ -142,7 +142,6 @@ class Wallet {
             .then(async wallet => {
                 this.wallet = wallet;
                 let chainHexId = await this.getChainHexId();
-                console.log(chainHexId);
                 if (this.provider.network.hexId == chainHexId) {
                     this.provider.setConnectedWallet(this);
                     this.provider.setWeb3Provider(new Web3(this.wallet));
