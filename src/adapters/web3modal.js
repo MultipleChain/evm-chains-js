@@ -18,7 +18,7 @@ module.exports = (provider) => {
 
     return {
         key: 'web3modal',
-        name: 'Web3Modal',
+        name: 'Web3 Wallets',
         supports: [
             'browser',
             'mobile'
