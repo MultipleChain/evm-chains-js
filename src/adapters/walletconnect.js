@@ -17,7 +17,7 @@ module.exports = (provider) => {
                 projectId,
                 themeMode: provider.wcThemeMode,
                 themeVariables: {
-                    '--w3m-z-index': 999999999999,
+                    '--wcm-z-index': 999999999999,
                 },
                 explorerExcludedWalletIds: "ALL",
                 explorerRecommendedWalletIds: [
