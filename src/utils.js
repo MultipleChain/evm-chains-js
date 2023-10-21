@@ -10,7 +10,6 @@ module.exports = Object.assign(utils, {
             error.message == 'Not supported chainId' || 
             String(error.message).indexOf('chain ID') > -1 ||
             String(error.message).indexOf('networkConfigurationId') > -1 ||
-            String(error.message).indexOf('disapproved requested chains') > -1 ||
             String(error.message).indexOf('The Provider is not connected to the requested chain.') > -1
         ) {
             return reject('not-accepted-chain')
@@ -41,7 +40,8 @@ module.exports = Object.assign(utils, {
             String(error.message).indexOf('Rejected') > -1 || 
             String(error.message).indexOf('cancelled') > -1 || 
             String(error.message).indexOf('canceled') > -1 || 
-            String(error.message).indexOf('rejected') > -1 
+            String(error.message).indexOf('rejected') > -1 ||
+            String(error.message).indexOf('disapproved requested chains') > -1 
         ) {
             return reject('request-rejected');
         } else if (error.message == 'transaction underpriced') { 

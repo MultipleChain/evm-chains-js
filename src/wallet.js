@@ -142,6 +142,7 @@ class Wallet {
             .then(async wallet => {
                 this.wallet = wallet;
                 let chainHexId = await this.getChainHexId();
+                console.log(chainHexId);
                 if (this.provider.network.hexId == chainHexId) {
                     this.provider.setConnectedWallet(this);
                     this.provider.setWeb3Provider(new Web3(this.wallet));
@@ -271,6 +272,51 @@ class Wallet {
         }
 
         return true;
+    }
+
+    /**
+     * @param {Array} abi 
+     * @param {String} byteCode 
+     * @param  {Array} args 
+     * @returns {Prmise<Object>}
+     */
+    deployContract(abi, byteCode, args) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let contract = this.provider.methods.newContract(abi);
+                let deployer = contract.deploy({
+                    data: byteCode,
+                    arguments: args
+                });
+
+                let estimateGas = await new Promise((resolve) => {
+                    deployer.estimateGas({
+                        from: this.connectedAccount
+                    },function(err, gas){
+                        if (err) {
+                            utils.rejectMessage(err, reject);
+                        }
+                        resolve(gas);
+                    });
+                });
+                
+                if (!estimateGas) return;
+
+                deployer.send({
+                    gas: estimateGas,
+                    from: this.connectedAccount
+                })
+                .then(function(newContractInstance){
+                    resolve(newContractInstance);
+                })
+                .catch(function(error){
+                    utils.rejectMessage(error, reject);
+                });
+            } catch (error) {
+                utils.rejectMessage(error, reject);
+            }
+        });
     }
 
     // Events    

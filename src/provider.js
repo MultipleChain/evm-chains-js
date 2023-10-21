@@ -5,6 +5,7 @@ const Coin = require('./entity/coin');
 const Token = require('./entity/token');
 const Contract = require('./entity/contract');
 const Transaction = require('./entity/transaction');
+const wagmiChains = require('@wagmi/chains');
 
 class Provider {
 
@@ -46,11 +47,6 @@ class Provider {
     /**
      * @var {Object}
      */
-    detectedWallets = {};
-
-    /**
-     * @var {Object}
-     */
     connectedWallet = {};
 
     /**
@@ -63,8 +59,26 @@ class Provider {
         this.wcProjectId = options.wcProjectId;
         this.wcThemeMode = options.wcThemeMode || 'light';
 
-        let networks = require('@multiplechain/evm-based-chains');
-        networks = this.testnet ? networks.testnets : networks.mainnets;
+        let mainnets = {};
+        let testnets = {};
+        Object.keys(wagmiChains).forEach(function(key) {
+            let chain = wagmiChains[key];
+            let explorerUrl = chain.blockExplorers ? chain.blockExplorers.default.url : null;
+            chain = Object.assign(chain, {
+                explorerUrl,
+                hexId: "0x" + chain.id.toString(16),
+                rpcUrl: chain.rpcUrls.default.http[0],
+            });
+
+            
+            if (key.includes('Testnet')) { 
+                testnets[key.replace('Testnet', '')] = chain;
+            } else {
+                mainnets[key] = chain;
+            }
+        });
+
+        let networks = this.testnet ? testnets : mainnets;
 
         if (typeof this.network == 'object') {
             this.network = this.network;
@@ -80,9 +94,6 @@ class Provider {
             this.qrPayments = true;
             this.web3ws = new Web3(new Web3.providers.WebsocketProvider(this.network.wsUrl));
         }
-
-
-        this.detectWallets();
     }
 
     /**
@@ -148,8 +159,9 @@ class Provider {
      */
     connectWallet(adapter) {
         return new Promise(async (resolve, reject) => {
-            if (this.detectedWallets[adapter]) {
-                let wallet = this.detectedWallets[adapter];
+            let detectedWallets = this.getDetectedWallets();
+            if (detectedWallets[adapter]) {
+                let wallet = detectedWallets[adapter];
                 wallet.connect()
                 .then(() => {
                     resolve(wallet);
@@ -179,6 +191,7 @@ class Provider {
         };
 
         if (this.wcProjectId) {
+            wallets['web3modal'] = new Wallet('web3modal', this);
             wallets['walletconnect'] = new Wallet('walletconnect', this);
         }
 
@@ -192,35 +205,11 @@ class Provider {
      * @returns {Array}
      */
     getDetectedWallets(filter) {
-        return Object.fromEntries(Object.entries(this.detectedWallets).filter(([key]) => {
-            return !filter ? true : filter.includes(key);
+        let detectedWallets = this.getSupportedWallets(filter);
+
+        return Object.fromEntries(Object.entries(detectedWallets).filter(([key, value]) => {
+            return value.adapter.detected == undefined ? true : value.adapter.detected;
         }));
-    }
-
-    detectWallets() {
-        if (typeof window != 'undefined') {
-            const Wallet = require('./wallet');
-
-            if (window?.ethereum?.isMetaMask) {
-                this.detectedWallets['metamask'] = new Wallet('metamask', this);
-            }
-
-            if (window?.ethereum?.isTrust || window?.trustwallet) {
-                this.detectedWallets['trustwallet'] = new Wallet('trustwallet', this);
-            }
-            
-            if (window?.BinanceChain?.bnbSign) {
-                this.detectedWallets['binancewallet'] = new Wallet('binancewallet', this);
-            }
-            
-            if (window?.phantom?.ethereum) {
-                this.detectedWallets['phantom'] = new Wallet('phantom', this);
-            }
-
-            if (this.wcProjectId) {
-                this.detectedWallets['walletconnect'] = new Wallet('walletconnect', this);
-            }
-        }
     }
 
     /**

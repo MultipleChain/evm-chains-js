@@ -30,9 +30,7 @@ module.exports = (provider) => {
         return new Promise(async (resolve, reject) => {
             wallet.enable()
             .then(() => {
-                setTimeout(() => {
-                    resolve(wallet);
-                }, 4000);
+                resolve(wallet);
             })
             .catch(error => {
                 reject(error);

@@ -60,13 +60,35 @@ class Contract {
      * @param  {...any} data 
      * @returns {String}
      */
-    async getEstimateGas(method, ...data) {
+    async getEstimateGas(method, ...args) {
         let ops = {};
-        if (data.length > 0) {
-            ops = data[data.length - 1];
-            data.splice(data.length - 1, 1)
+        if (args.length > 0) {
+            ops = args[args.length - 1];
+            args.splice(args.length - 1, 1)
         }
-        return utils.hex((await this.methods[method](...data).estimateGas(ops)));
+        return utils.hex((await this.methods[method](...args).estimateGas(ops)));
+    }
+
+    /**
+     * 
+     * @param {String} method 
+     * @param  {Array} args 
+     * @param {Object} options
+     * @returns {any}
+     */
+    call(method, args = [], options = {}) {
+        return this.methods[method](...args).call(options);
+    }
+
+    /**
+     * 
+     * @param {String} method 
+     * @param  {Array} args 
+     * @param {Object} options
+     * @returns {any}
+     */
+    send(method, args = [], options = {}) {
+        return this.methods[method](...args).send(options);
     }
 }
 

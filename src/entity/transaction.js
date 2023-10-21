@@ -308,6 +308,9 @@ class Transaction {
      * @returns {String}
      */
     getUrl() {
+        if (!this.provider.network.explorerUrl) {
+            throw new Error('explorer-url-not-found');
+        }
         let explorerUrl = this.provider.network.explorerUrl;
         explorerUrl += explorerUrl.endsWith('/') ? '' : '/';
         explorerUrl += 'tx/'+this.hash;
