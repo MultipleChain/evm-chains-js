@@ -30,7 +30,8 @@ module.exports = Object.assign(utils, {
             error.message == 'cancelled' || 
             error.message == 'User canceled' || 
             error.message == 'User rejected the transaction' || 
-            error.message == 'An unexpected error occurred'
+            error.message == 'An unexpected error occurred' || 
+            error.message == 'User disapproved requested chains'
         ) {
             return reject('request-rejected');
         } else if (error.message == 'User closed modal') {

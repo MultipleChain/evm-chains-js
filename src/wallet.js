@@ -105,12 +105,21 @@ class Wallet {
     /**
      * @returns {String}
      */
+    async getChainId() {
+        let id = await this.request({method: 'eth_chainId'});
+        if (!utils.isNumeric(id)) return parseInt(id, 16);
+        return id;
+    }
+
+    /**
+     * @returns {String}
+     */
     async getChainHexId() {
         let id = await this.request({method: 'eth_chainId'});
         if (id == '0x01') return '0x1';
         if (utils.isNumeric(id)) return '0x' + id.toString(16);
         return id;
-    };
+    }
 
     /**
      * @returns {Boolean}

@@ -6,6 +6,7 @@ const Token = require('./entity/token');
 const Contract = require('./entity/contract');
 const Transaction = require('./entity/transaction');
 const wagmiChains = require('@wagmi/chains');
+const Web3Modal = require('@multiplechain/web3modal');
 
 class Provider {
 
@@ -40,6 +41,11 @@ class Provider {
     wcThemeMode = 'light';
 
     /**
+     * @var {Web3Modal}
+     */
+    web3Modal;
+
+    /**
      * @var {Object}
      */
     network = {};
@@ -48,6 +54,11 @@ class Provider {
      * @var {Object}
      */
     connectedWallet = {};
+
+    /**
+     * @var {Object}
+     */
+    supportedWallets = {};
 
     /**
      * @param {Object} options
@@ -94,6 +105,8 @@ class Provider {
             this.qrPayments = true;
             this.web3ws = new Web3(new Web3.providers.WebsocketProvider(this.network.wsUrl));
         }
+
+        this.initSupportedWallets();
     }
 
     /**
@@ -176,14 +189,31 @@ class Provider {
     }
 
     /**
-     * @param {Array|null} filter 
-     * @returns {Array}
+     * @returns {Web3Modal}
      */
-    getSupportedWallets(filter) {
+    createWeb3Modal() {
+        if (this.web3Modal) return web3Modal;
 
+        this.web3Modal = new Web3Modal({
+            network: this.network,
+            projectId: this.wcProjectId,
+            themeMode: this.wcThemeMode,
+        });
+
+        this.web3Modal.getName = () => {
+            return 'Web3 Wallets';
+        }
+
+        return this.web3Modal;
+    }
+
+    /**
+     * @returns {void}
+     */
+    initSupportedWallets() {
         const Wallet = require('./wallet');
         
-        const wallets  = {
+        this.supportedWallets  = {
             metamask: new Wallet('metamask', this),
             trustwallet: new Wallet('trustwallet', this),
             binancewallet: new Wallet('binancewallet', this),
@@ -191,11 +221,17 @@ class Provider {
         };
 
         if (this.wcProjectId) {
-            wallets['web3modal'] = new Wallet('web3modal', this);
-            wallets['walletconnect'] = new Wallet('walletconnect', this);
+            this.supportedWallets['web3modal'] = this.createWeb3Modal();
+            this.supportedWallets['walletconnect'] = new Wallet('walletconnect', this);
         }
+    }
 
-        return Object.fromEntries(Object.entries(wallets).filter(([key]) => {
+    /**
+     * @param {Array|null} filter 
+     * @returns {Array}
+     */
+    getSupportedWallets(filter) {
+        return Object.fromEntries(Object.entries(this.supportedWallets).filter(([key]) => {
             return !filter ? true : filter.includes(key);
         }));
     }
@@ -208,7 +244,7 @@ class Provider {
         let detectedWallets = this.getSupportedWallets(filter);
 
         return Object.fromEntries(Object.entries(detectedWallets).filter(([key, value]) => {
-            return value.adapter.detected == undefined ? true : value.adapter.detected;
+            return value.isDetected() == undefined ? true : value.isDetected()
         }));
     }
 

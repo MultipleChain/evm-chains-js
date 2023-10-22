@@ -4,7 +4,6 @@ const adapters = {
     trustwallet: require('./adapters/trustwallet'),
     walletconnect: require('./adapters/walletconnect'),
     phantom: require('./adapters/phantom'),
-    web3modal: require('./adapters/web3modal'),
 }
 
 /**
