@@ -12,8 +12,14 @@ module.exports = (provider) => {
     });
 
     const connect = async () => {
-        await web3Modal.connect();
-        return await web3Modal.getWalletClient();
+        return new Promise(async (resolve, reject) => {
+            web3Modal.connect()
+            .then(async () => {
+                resolve(await web3Modal.getWalletClient());
+            }).catch((error) => {
+                reject(error);
+            });
+        });
     }
 
     return {
