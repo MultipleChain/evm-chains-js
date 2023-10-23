@@ -298,18 +298,14 @@ class Wallet {
                     arguments: args
                 });
 
-                let estimateGas = await new Promise((resolve) => {
-                    deployer.estimateGas({
-                        from: this.connectedAccount
-                    },function(err, gas){
-                        if (err) {
-                            utils.rejectMessage(err, reject);
-                        }
-                        resolve(gas);
-                    });
+                let estimateGas = await this.provider.methods.getEstimateGas({
+                    from: this.connectedAccount,
+                    data: deployer.encodeABI()
                 });
                 
-                if (!estimateGas) return;
+                if (!estimateGas) {
+                    return reject('transaction-create-fail');
+                }
 
                 deployer.send({
                     gas: estimateGas,
