@@ -70,8 +70,7 @@ class Provider {
         this.wcProjectId = options.wcProjectId;
         this.wcThemeMode = options.wcThemeMode || 'light';
 
-        let mainnets = {};
-        let testnets = {};
+        let networks = {};
         Object.keys(wagmiChains).forEach(function(key) {
             let chain = wagmiChains[key];
             let explorerUrl = chain.blockExplorers ? chain.blockExplorers.default.url : null;
@@ -80,21 +79,19 @@ class Provider {
                 hexId: "0x" + chain.id.toString(16),
                 rpcUrl: chain.rpcUrls.default.http[0],
             });
-
             
-            if (key.includes('Testnet')) { 
-                testnets[key.replace('Testnet', '')] = chain;
-            } else {
-                mainnets[key] = chain;
-            }
+            networks[key] = chain;
         });
-
-        let networks = this.testnet ? testnets : mainnets;
 
         if (typeof this.network == 'object') {
             this.network = this.network;
-        } else if (networks[this.network]) {
+        } else if (typeof this.network == 'string') {
+            if (this.testnet && !this.network.includes('Testnet')) {
+                this.network += 'Testnet';
+            }
             this.network = networks[this.network];
+        } else if (utils.isNumeric(this.network)) {
+            this.network = Object.values(networks).find(network => network.id == parseInt(this.network));
         } else {
             throw new Error('Network not found!');
         }
