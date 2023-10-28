@@ -48,24 +48,20 @@ class Contract {
 
     /**
      * @param {String} method
-     * @param  {...any} data 
+     * @param  {Array} args 
      * @returns {String}
      */
-    getData(method, ...data) {
-        return this.methods[method](...data).encodeABI();
+    getData(method, args) {
+        return this.methods[method](...args).encodeABI();
     }
 
     /**
      * @param {String} method
-     * @param  {...any} data 
+     * @param  {Array} args 
+     * @param {Object} ops
      * @returns {String}
      */
-    async getEstimateGas(method, ...args) {
-        let ops = {};
-        if (args.length > 0) {
-            ops = args[args.length - 1];
-            args.splice(args.length - 1, 1)
-        }
+    async getEstimateGas(method, args, ops) {
         return utils.hex((await this.methods[method](...args).estimateGas(ops)));
     }
 
