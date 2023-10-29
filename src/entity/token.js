@@ -101,8 +101,8 @@ class Token {
 
             amount = utils.toHex(amount, (await this.getDecimals()));
 
-            let data = await this.contract.getData('transfer', to, amount);
-            let gas = await this.contract.getEstimateGas('transfer', to, amount, {from});
+            let data = await this.contract.getData('transfer', [to, amount]);
+            let gas = await this.contract.getEstimateGas('transfer', [to, amount], {from});
 
             return resolve([{
                 to: this.address,
@@ -123,15 +123,9 @@ class Token {
         return new Promise(async (resolve, reject) => {
             amount = utils.toHex(amount, (await this.getDecimals()));
             
-            let data = this.contract.getData('approve', spender, amount);
+            let data = this.contract.getData('approve', [spender, amount]);
+            let gas = await this.contract.getEstimateGas('approve', [spender, amount], {from});
             
-            let gas = await this.provider.methods.getEstimateGas({
-                to: this.address,
-                value: '0x0',
-                from,
-                data
-            });
-
             return resolve([{
                 to: this.address,
                 value: '0x0',
