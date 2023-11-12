@@ -39,14 +39,6 @@ class Methods {
     }
 
     /**
-     * @param {String} ens 
-     * @returns 
-     */
-    getAddressFromEns(ens) {
-        return this.web3Provider.eth.ens.getAddress(ens);
-    }
-
-    /**
      * @param {Object} data 
      * @returns {String}
      */

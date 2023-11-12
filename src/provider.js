@@ -13,6 +13,11 @@ class Provider {
     /**
      * @var {Object}
      */
+    web3 = null;
+
+    /**
+     * @var {Object}
+     */
     web3ws = null;
 
     /**
@@ -96,7 +101,7 @@ class Provider {
             throw new Error('Network not found!');
         }
 
-        this.setWeb3Provider(new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
+        this.setWeb3Provider(this.web3 = new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
 
         if (this.network.wsUrl) {
             this.qrPayments = true;
@@ -104,6 +109,22 @@ class Provider {
         }
 
         this.initSupportedWallets();
+    }
+
+    checkStatus() {
+        return new Promise((resolve, reject) => {
+            try {
+                this.web3.eth.net.getId((err) => {
+                    if (err) {
+                        reject(false);
+                    } else {
+                        resolve(true);
+                    }
+                });
+            } catch (error) {
+                reject(false);
+            }
+        });
     }
 
     /**
@@ -243,14 +264,6 @@ class Provider {
         return Object.fromEntries(Object.entries(detectedWallets).filter(([key, value]) => {
             return value.isDetected() == undefined ? true : value.isDetected()
         }));
-    }
-
-    /**
-     * @param {String} ensDomain
-     * @returns 
-     */
-    getAddressFromEns(ensDomain) {
-        return this.methods.getAddressFromEns(ensDomain);
     }
 
     /**
