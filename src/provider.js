@@ -58,6 +58,11 @@ class Provider {
     /**
      * @var {Object}
      */
+    networks = {};
+
+    /**
+     * @var {Object}
+     */
     connectedWallet = {};
 
     /**
@@ -75,29 +80,43 @@ class Provider {
         this.wcProjectId = options.wcProjectId;
         this.wcThemeMode = options.wcThemeMode || 'light';
 
-        let networks = {};
-        Object.keys(wagmiChains).forEach(function(key) {
+        Object.keys(wagmiChains).forEach((key) => {
             let chain = wagmiChains[key];
             let explorerUrl = chain.blockExplorers ? chain.blockExplorers.default.url : null;
+
+            let rpcUrl = chain.rpcUrls.default.http[0];
+            if (chain.rpcUrls.infura) {
+                rpcUrl = chain.rpcUrls.infura.http[0];
+            } else if (chain.rpcUrls.alchemy) {
+                rpcUrl = chain.rpcUrls.alchemy.http[0];
+            }
+
             chain = Object.assign(chain, {
                 explorerUrl,
                 hexId: "0x" + chain.id.toString(16),
-                rpcUrl: chain.rpcUrls.default.http[0],
+                rpcUrl,
             });
+
+            if (chain.rpcUrls.default.webSocket && chain.rpcUrls.default.webSocket[0]) {
+                chain.wsUrl = chain.rpcUrls.default.webSocket[0];
+            } else if (chain.rpcUrls.infura && chain.rpcUrls.infura.webSocket && chain.rpcUrls.infura.webSocket[0]) {
+                chain.wsUrl = chain.rpcUrls.infura.webSocket[0];
+            } else if (chain.rpcUrls.alchemy && chain.rpcUrls.alchemy.webSocket && chain.rpcUrls.alchemy.webSocket[0]) {
+                chain.wsUrl = chain.rpcUrls.alchemy.webSocket[0];
+            }
             
-            networks[key] = chain;
+            this.networks[key] = chain;
         });
 
         if (typeof this.network == 'object') {
             this.network = this.network;
         } else if (typeof this.network == 'string') {
-            if (this.testnet && !this.network.includes('Testnet')) {
-                this.network += 'Testnet';
-            }
-            this.network = networks[this.network];
+            this.network = this.networks[this.network];
         } else if (utils.isNumeric(this.network)) {
-            this.network = Object.values(networks).find(network => network.id == parseInt(this.network));
-        } else {
+            this.network = Object.values(this.networks).find(network => network.id == parseInt(this.network));
+        }
+        
+        if (!this.network) {
             throw new Error('Network not found!');
         }
 
@@ -109,6 +128,10 @@ class Provider {
         }
 
         this.initSupportedWallets();
+    }
+
+    getNetworks() {
+        return this.networks;
     }
 
     checkStatus() {

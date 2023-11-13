@@ -117,7 +117,7 @@ class Wallet {
     async getChainHexId() {
         let id = await this.request({method: 'eth_chainId'});
         if (id == '0x01') return '0x1';
-        if (utils.isNumeric(id)) return '0x' + id.toString(16);
+        if (!id.startsWith('0x')) return '0x' + id.toString(16);
         return id;
     }
 
