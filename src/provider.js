@@ -247,7 +247,7 @@ class Provider {
      * @returns {Web3Modal}
      */
     createWeb3Modal() {
-        if (this.web3Modal) return web3Modal;
+        if (this.web3Modal) return this.web3Modal;
 
         this.web3Modal = new Web3Modal({
             network: this.network,
