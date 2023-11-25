@@ -4,13 +4,15 @@ module.exports = (provider) => {
     const { EthereumProvider } = require('@walletconnect/ethereum-provider');
 
     const rpcIdMapping = {};
-    rpcIdMapping[network.id] = network.rpcUrl;
+    if (network) {
+        rpcIdMapping[network.id] = network.rpcUrl;
+    }
 
     const connect = async () => {
         let wallet = await EthereumProvider.init({
             projectId,
             relayUrl: 'wss://relay.walletconnect.com',
-            chains: [network.id],
+            chains: network ? [network.id] : [],
             rpcMap: rpcIdMapping,
             showQrModal: true,
             qrModalOptions: {

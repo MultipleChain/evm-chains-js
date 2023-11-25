@@ -24,6 +24,6 @@ module.exports = () => {
         ],
         connect,
         download: 'https://chrome.google.com/webstore/detail/binance-wallet/fhbohimaelbohpjbbldcngcnapndodjp',
-        detected : Boolean(window?.BinanceChain?.bnbSign)
+        isDetected: () => Boolean(window?.BinanceChain?.bnbSign) 
     }
 }

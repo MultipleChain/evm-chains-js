@@ -1,5 +1,12 @@
 module.exports = (wallet, provider) => {
     const network = provider.network;
+    
+    if (!network) {
+        return new Promise(async (resolve) => {
+            resolve(true);
+        });
+    }
+
     const {isNumeric, hex} = require('../utils.js');
 
     this.addNetwork = (network) => {

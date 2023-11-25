@@ -40,6 +40,6 @@ module.exports = (provider) => {
         ],
         connect,
         download: 'https://trustwallet.com/download',
-        detected : Boolean(window?.ethereum?.isTrust || window?.trustwallet)
+        isDetected : () => Boolean(window?.ethereum?.isTrust || window?.trustwallet)
     }
 }

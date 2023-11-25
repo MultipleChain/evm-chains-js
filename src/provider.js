@@ -56,9 +56,9 @@ class Provider {
     network = {};
 
     /**
-     * @var {Object}
+     * @var {Array}
      */
-    networks = {};
+    networks = [];
 
     /**
      * @var {Object}
@@ -105,29 +105,43 @@ class Provider {
                 chain.wsUrl = chain.rpcUrls.alchemy.webSocket[0];
             }
             
-            this.networks[key] = chain;
+            this.networks.push(chain)
         });
 
         if (typeof this.network == 'object') {
             this.network = this.network;
-        } else if (typeof this.network == 'string') {
-            this.network = this.networks[this.network];
         } else if (utils.isNumeric(this.network)) {
-            this.network = Object.values(this.networks).find(network => network.id == parseInt(this.network));
+            this.network = this.networks.find(network => network.id == parseInt(this.network));
+        } else if (typeof this.network == 'string') {
+            this.network = this.networks.find(network => network.network == this.network);
         }
         
-        if (!this.network) {
-            throw new Error('Network not found!');
-        }
-
-        this.setWeb3Provider(this.web3 = new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
-
-        if (this.network.wsUrl) {
-            this.qrPayments = true;
-            this.web3ws = new Web3(new Web3.providers.WebsocketProvider(this.network.wsUrl));
+        if (this.network) {
+            this.setWeb3(this.network);
         }
 
         this.initSupportedWallets();
+    }
+
+    setWeb3(network) {
+        this.setWeb3Provider(this.web3 = new Web3(new Web3.providers.HttpProvider(network.rpcUrl)));
+
+        if (network.wsUrl) {
+            this.qrPayments = true;
+            this.web3ws = new Web3(new Web3.providers.WebsocketProvider(network.wsUrl));
+        }
+    }
+
+    setNetwork(network) {
+        if (typeof network == 'object') {
+            this.network = network;
+        } else if (utils.isNumeric(network)) {
+            this.network = this.networks.find(n => n.id == parseInt(network));
+        } else if (typeof network == 'string') {
+            this.network = this.networks.find(n => n.network == network);
+        }
+
+        this.setWeb3(this.network);
     }
 
     getNetworks() {
@@ -283,7 +297,6 @@ class Provider {
      */
     getDetectedWallets(filter) {
         let detectedWallets = this.getSupportedWallets(filter);
-
         return Object.fromEntries(Object.entries(detectedWallets).filter(([key, value]) => {
             return value.isDetected() == undefined ? true : value.isDetected()
         }));

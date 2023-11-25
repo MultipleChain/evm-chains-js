@@ -36,6 +36,6 @@ module.exports = (provider) => {
         connect,
         deepLink: 'https://metamask.app.link/dapp/{siteUrl}',
         download: 'https://metamask.io/download/',
-        detected : Boolean(window?.ethereum?.isMetaMask)
+        isDetected: () => Boolean(window?.ethereum?.isMetaMask)
     }
 }

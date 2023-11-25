@@ -84,7 +84,7 @@ class Wallet {
      * @returns {Boolean}
      */
     isDetected() {
-        return this.adapter.detected;
+        return this.adapter.isDetected ? this.adapter.isDetected() : undefined;
     }
 
     /**
@@ -151,7 +151,11 @@ class Wallet {
             .then(async wallet => {
                 this.wallet = wallet;
                 let chainHexId = await this.getChainHexId();
-                if (this.provider.network.hexId == chainHexId) {
+                if (!this.provider.network || this.provider.network.hexId == chainHexId) {
+                    if (!this.provider.network) {
+                        this.provider.setNetwork(chainHexId);
+                    }
+                    
                     this.provider.setConnectedWallet(this);
                     this.provider.setWeb3Provider(new Web3(this.wallet));
 
