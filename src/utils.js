@@ -13,6 +13,26 @@ module.exports = Object.assign(utils, {
             String(error.message).indexOf('The Provider is not connected to the requested chain.') > -1
         ) {
             return reject('not-accepted-chain')
+        } else if (
+            error.code == 4001 || 
+            error.error == 'Rejected by user' || 
+            error.message == 'cancelled' || 
+            error.message == 'User canceled' || 
+            error.message == 'user reject this request' ||
+            error.message == 'User rejected the transaction' || 
+            error.message == 'An unexpected error occurred' || 
+            error.message == 'User disapproved requested chains'
+        ) {
+            return reject('request-rejected');
+        } else if (
+            String(error.message).indexOf('User') > -1 || 
+            String(error.message).indexOf('Rejected') > -1 || 
+            String(error.message).indexOf('cancelled') > -1 || 
+            String(error.message).indexOf('canceled') > -1 || 
+            String(error.message).indexOf('rejected') > -1 ||
+            String(error.message).indexOf('disapproved requested chains') > -1 
+        ) {
+            return reject('request-rejected');
         } else if (String(error.message).indexOf('Invalid RPC URL') > -1) {
             return reject("invalid-rpc-error");
         } else if (error.code == -32603) {
@@ -24,27 +44,8 @@ module.exports = Object.assign(utils, {
             error.code == -32002    
         ) {
             return reject('already-processing');
-        } else if (
-            error.code == 4001 || 
-            error.error == 'Rejected by user' || 
-            error.message == 'cancelled' || 
-            error.message == 'User canceled' || 
-            error.message == 'User rejected the transaction' || 
-            error.message == 'An unexpected error occurred' || 
-            error.message == 'User disapproved requested chains'
-        ) {
-            return reject('request-rejected');
         } else if (error.message == 'User closed modal') {
             return reject("closed-walletconnect-modal");
-        }  else if (
-            String(error.message).indexOf('User') > -1 || 
-            String(error.message).indexOf('Rejected') > -1 || 
-            String(error.message).indexOf('cancelled') > -1 || 
-            String(error.message).indexOf('canceled') > -1 || 
-            String(error.message).indexOf('rejected') > -1 ||
-            String(error.message).indexOf('disapproved requested chains') > -1 
-        ) {
-            return reject('request-rejected');
         } else if (error.message == 'transaction underpriced') { 
             return reject('transaction-underpriced');
         }

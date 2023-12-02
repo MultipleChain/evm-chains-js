@@ -63,12 +63,17 @@ class Provider {
     /**
      * @var {Object}
      */
-    connectedWallet = {};
+    supportedWallets;
 
     /**
      * @var {Object}
      */
-    supportedWallets = {};
+    connectedWallet = {};
+
+    /**
+     * @var {Array}
+     */
+    wcCustomWallets = [];
 
     /**
      * @param {Object} options
@@ -79,6 +84,7 @@ class Provider {
         this.testnet = options.testnet;
         this.wcProjectId = options.wcProjectId;
         this.wcThemeMode = options.wcThemeMode || 'light';
+        this.wcCustomWallets = options.wcCustomWallets || [];
 
         Object.keys(wagmiChains).forEach((key) => {
             let chain = wagmiChains[key];
@@ -119,8 +125,6 @@ class Provider {
         if (this.network) {
             this.setWeb3(this.network);
         }
-
-        this.initSupportedWallets();
     }
 
     setWeb3(network) {
@@ -253,6 +257,7 @@ class Provider {
             network: this.network,
             projectId: this.wcProjectId,
             themeMode: this.wcThemeMode,
+            customWallets: this.wcCustomWallets
         });
 
         this.web3Modal.getName = () => {
@@ -263,29 +268,29 @@ class Provider {
     }
 
     /**
-     * @returns {void}
-     */
-    initSupportedWallets() {
-        const Wallet = require('./wallet');
-        
-        this.supportedWallets  = {
-            metamask: new Wallet('metamask', this),
-            trustwallet: new Wallet('trustwallet', this),
-            binancewallet: new Wallet('binancewallet', this),
-            phantom: new Wallet('phantom', this),
-        };
-
-        if (this.wcProjectId) {
-            this.supportedWallets['web3modal'] = this.createWeb3Modal();
-            this.supportedWallets['walletconnect'] = new Wallet('walletconnect', this);
-        }
-    }
-
-    /**
      * @param {Array|null} filter 
      * @returns {Array}
      */
     getSupportedWallets(filter) {
+
+        if (!this.supportedWallets) {
+            const Wallet = require('./wallet');
+            
+            this.supportedWallets  = {
+                metamask: new Wallet('metamask', this),
+                trustwallet: new Wallet('trustwallet', this),
+                binancewallet: new Wallet('binancewallet', this),
+                phantom: new Wallet('phantom', this),
+                bitget: new Wallet('bitget', this),
+                okx: new Wallet('okx', this),
+            };
+
+            if (this.wcProjectId) {
+                this.supportedWallets['web3modal'] = this.createWeb3Modal();
+                this.supportedWallets['walletconnect'] = new Wallet('walletconnect', this);
+            }
+        }
+
         return Object.fromEntries(Object.entries(this.supportedWallets).filter(([key]) => {
             return !filter ? true : filter.includes(key);
         }));

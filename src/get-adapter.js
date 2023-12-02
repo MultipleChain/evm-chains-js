@@ -4,6 +4,8 @@ const adapters = {
     trustwallet: require('./adapters/trustwallet'),
     walletconnect: require('./adapters/walletconnect'),
     phantom: require('./adapters/phantom'),
+    bitget: require('./adapters/bitget'),
+    okx: require('./adapters/okx'),
 }
 
 /**

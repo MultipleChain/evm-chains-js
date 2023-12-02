@@ -1,5 +1,6 @@
 module.exports = (wallet, provider) => {
     const network = provider.network;
+    const networks = provider.networks;
     
     if (!network) {
         return new Promise(async (resolve) => {
@@ -12,6 +13,7 @@ module.exports = (wallet, provider) => {
     this.addNetwork = (network) => {
         return new Promise(async (resolve, reject) => {
             try {
+                network = networks.find(n => n.id == network.id);
                 wallet.request({
                     method: 'wallet_addEthereumChain',
                     params: [{
