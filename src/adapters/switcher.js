@@ -8,16 +8,17 @@ module.exports = (wallet, provider) => {
         });
     }
 
-    const {isNumeric, hex} = require('../utils.js');
+    const {hex} = require('../utils.js');
 
     this.addNetwork = (network) => {
         return new Promise(async (resolve, reject) => {
             try {
                 network = networks.find(n => n.id == network.id);
+                let chainId = network.hexId || hex(network.id);
                 wallet.request({
                     method: 'wallet_addEthereumChain',
                     params: [{
-                        chainId: network.hexId,
+                        chainId,
                         chainName: network.name,
                         rpcUrls: [network.rpcUrl],
                         nativeCurrency: network.nativeCurrency,
@@ -39,9 +40,10 @@ module.exports = (wallet, provider) => {
     this.changeNetwork = (network) => {
         network = JSON.parse(JSON.stringify(network));
         return new Promise(async (resolve, reject) => {
+            let chainId = network.hexId || hex(network.id);
             wallet.request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: network.hexId }],
+                params: [{ chainId }],
             })
             .then(() => {
                 resolve(true);
@@ -67,14 +69,16 @@ module.exports = (wallet, provider) => {
 
     this.getChainHexId = async () => {
         let id = await wallet.request({method: 'eth_chainId'});
-        if (isNumeric(id)) return hex(id);
+        if (id == '0x01') return '0x1';
+        if (!id.startsWith('0x')) return '0x' + id.toString(16);
         return id;
     }
 
     this.maybeSwitch = () => {
         return new Promise(async (resolve, reject) => {
             try {
-                if (await this.getChainHexId() != network.hexId) {
+                let chainId = network.hexId || hex(network.id);
+                if (await this.getChainHexId() != chainId) {
                     this.changeNetwork(network)
                     .then(() => {
                         resolve(true);
