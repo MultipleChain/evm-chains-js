@@ -80,7 +80,6 @@ class Provider {
      */
     constructor(options) {
 
-        this.network = options.network;
         this.testnet = options.testnet;
         this.wcProjectId = options.wcProjectId;
         this.wcThemeMode = options.wcThemeMode || 'light';
@@ -114,26 +113,7 @@ class Provider {
             this.networks.push(chain)
         });
 
-        if (typeof this.network == 'object') {
-            this.network = this.network;
-        } else if (utils.isNumeric(this.network)) {
-            this.network = this.networks.find(network => network.id == parseInt(this.network));
-        } else if (typeof this.network == 'string') {
-            this.network = this.networks.find(network => network.network == this.network);
-        }
-        
-        if (this.network) {
-            this.setWeb3(this.network);
-        }
-    }
-
-    setWeb3(network) {
-        this.setWeb3Provider(this.web3 = new Web3(new Web3.providers.HttpProvider(network.rpcUrl)));
-
-        if (network.wsUrl) {
-            this.qrPayments = true;
-            this.web3ws = new Web3(new Web3.providers.WebsocketProvider(network.wsUrl));
-        }
+        this.setNetwork(options.network);
     }
 
     setNetwork(network) {
@@ -143,9 +123,20 @@ class Provider {
             this.network = this.networks.find(n => n.id == parseInt(network));
         } else if (typeof network == 'string') {
             this.network = this.networks.find(n => n.network == network);
+        } else {
+            throw new Error('Invalid network!');
         }
 
         this.setWeb3(this.network);
+    }
+
+    setWeb3(network) {
+        this.setWeb3Provider(this.web3 = new Web3(new Web3.providers.HttpProvider(network.rpcUrl)));
+
+        if (network.wsUrl) {
+            this.qrPayments = true;
+            this.web3ws = new Web3(new Web3.providers.WebsocketProvider(network.wsUrl));
+        }
     }
 
     getNetworks() {

@@ -34,7 +34,7 @@
   "homepage": "https://github.com/MultipleChain/evm-chains-js",
   "dependencies": {
     "@multiplechain/utils": "^0.1.2",
-    "@multiplechain/web3modal": "^0.1.30",
+    "@multiplechain/web3modal": "^0.1.31",
     "@wagmi/chains": "^1.8.0",
     "@walletconnect/ethereum-provider": "^2.8.6",
     "@walletconnect/modal": "^2.5.9",
