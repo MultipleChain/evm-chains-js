@@ -70,7 +70,7 @@ module.exports = (wallet, provider) => {
     this.getChainHexId = async () => {
         let id = await wallet.request({method: 'eth_chainId'});
         if (id == '0x01') return '0x1';
-        if (!id.startsWith('0x')) return '0x' + id.toString(16);
+        if (!String(id).startsWith('0x')) return '0x' + id.toString(16);
         return id;
     }
 
