@@ -10,12 +10,24 @@ module.exports = (wallet, provider) => {
 
     const {hex} = require('../utils.js');
 
+    const request = async (params) => {
+        let res = await wallet.request(params);
+        if (res.error) {
+            if (res.error.code == -32000) {
+                throw new Error('rpc-timeout');
+            }
+            throw new Error(res.error.message);
+            
+        }
+        return res;
+    }
+
     this.addNetwork = (network) => {
         return new Promise(async (resolve, reject) => {
             try {
                 network = networks.find(n => n.id == network.id);
                 let chainId = network.hexId || hex(network.id);
-                wallet.request({
+                request({
                     method: 'wallet_addEthereumChain',
                     params: [{
                         chainId,
@@ -41,7 +53,7 @@ module.exports = (wallet, provider) => {
         network = JSON.parse(JSON.stringify(network));
         return new Promise(async (resolve, reject) => {
             let chainId = network.hexId || hex(network.id);
-            wallet.request({
+            request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId }],
             })
@@ -68,7 +80,7 @@ module.exports = (wallet, provider) => {
     }
 
     this.getChainHexId = async () => {
-        let id = await wallet.request({method: 'eth_chainId'});
+        let id = await request({method: 'eth_chainId'});
         if (id == '0x01') return '0x1';
         if (!String(id).startsWith('0x')) return '0x' + id.toString(16);
         return id;

@@ -38,50 +38,60 @@ class Methods {
         return new this.web3Provider.eth.Contract(abi);
     }
 
+    checkResult(result) {
+        if (result.error) {
+            if (result.error.code == -32000) {
+                throw new Error('rpc-timeout');
+            }
+            throw new Error(result.error.message);
+        }
+        return result;
+    }
+
     /**
      * @param {Object} data 
      * @returns {String}
      */
     async getEstimateGas(data) {
-        return utils.hex((await this.web3Provider.eth.estimateGas(data)).toString());
+        return utils.hex((this.checkResult(await this.web3Provider.eth.estimateGas(data))).toString());
     }
 
     /**
      * @returns {String}
      */
     async getGasPrice() {
-        return utils.hex((await this.web3Provider.eth.getGasPrice()).toString());
+        return utils.hex((this.checkResult(await this.web3Provider.eth.getGasPrice())).toString());
     }
     
     /**
      * @param ...args
      * @returns {Object}
      */
-    getBlock(...args) {
-        return this.web3Provider.eth.getBlock(...args);
+    async getBlock(...args) {
+        return this.checkResult(await this.web3Provider.eth.getBlock(...args));
     }
     
     /**
      * @returns {Number}
      */
-    getBlockNumber() {
-        return this.web3Provider.eth.getBlockNumber();
+    async getBlockNumber() {
+        return this.checkResult(await this.web3Provider.eth.getBlockNumber());
     }
 
     /**
      * @param {String} hash 
      * @returns {Object}
      */
-    getTransaction(hash) {
-        return this.web3Provider.eth.getTransaction(hash);
+    async getTransaction(hash) {
+        return this.checkResult(await this.web3Provider.eth.getTransaction(hash));
     }
 
     /**
      * @param {String} hash 
      * @returns {Object}
      */
-    getTransactionReceipt(hash) {
-        return this.web3Provider.eth.getTransactionReceipt(hash);
+    async getTransactionReceipt(hash) {
+        return this.checkResult(await this.web3Provider.eth.getTransactionReceipt(hash));
     }
 
     /**
@@ -89,7 +99,7 @@ class Methods {
      * @returns {Number}
      */
     async getBalance(address) {
-        return (await this.web3Provider.eth.getBalance(address));
+        return this.checkResult(await this.web3Provider.eth.getBalance(address));
     }
     
 }

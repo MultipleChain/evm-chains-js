@@ -91,8 +91,15 @@ class Wallet {
      * @param {Object} params
      * @returns {Prmise}
      */
-    request(params) {
-        return this.wallet.request(params);
+    async request(params) {
+        let res = await this.wallet.request(params);
+        if (res.error) {
+            if (res.error.code == -32000) {
+                throw new Error('rpc-timeout');
+            }
+            throw new Error(res.error.message);
+        }
+        return res;
     }
 
     /**

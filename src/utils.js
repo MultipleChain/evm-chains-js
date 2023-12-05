@@ -6,6 +6,7 @@ module.exports = Object.assign(utils, {
         return Web3Utils.isAddress(address);
     },
     rejectMessage(error, reject) {
+        console.log(error);
         if (
             error.message == 'Not supported chainId' || 
             String(error.message).indexOf('chain ID') > -1 ||
@@ -35,7 +36,13 @@ module.exports = Object.assign(utils, {
             return reject('request-rejected');
         } else if (String(error.message).indexOf('Invalid RPC URL') > -1) {
             return reject("invalid-rpc-error");
-        } else if (error.code == -32603) {
+        } else if (
+            String(error.message).includes('timeout') || 
+            String(error.message).includes('request timed out') ||
+            error.code == -32000
+        ) {
+            return reject('rpc-timeout');
+        } else if (error.code == -32603 || error.code == -32602) {
             return reject('transaction-create-fail');
         } else if (error.code == -32601) {
             return reject('non-supported-method');
