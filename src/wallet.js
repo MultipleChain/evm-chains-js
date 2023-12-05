@@ -164,7 +164,6 @@ class Wallet {
                     }
                     
                     this.provider.setConnectedWallet(this);
-                    this.provider.setWeb3Provider(new Web3(this.wallet));
 
                     this.connectedAccount = (await this.getAccounts())[0];
                     this.connectedNetwork = this.provider.network;
@@ -210,11 +209,15 @@ class Wallet {
             try {
                 this.validate(to, amount, tokenAddress);
                 let token = this.provider.Token(tokenAddress);
-                let data = await token.transfer(this.connectedAccount, to, amount);
-
-                this.sendTransaction(data)
-                .then((transactionId) => {
-                    resolve(this.provider.Transaction(transactionId));
+                token.transfer(this.connectedAccount, to, amount)
+                .then((data) => {
+                    this.sendTransaction(data)
+                    .then((transactionId) => {
+                        resolve(this.provider.Transaction(transactionId));
+                    })
+                    .catch((error) => {
+                        utils.rejectMessage(error, reject);
+                    });
                 })
                 .catch((error) => {
                     utils.rejectMessage(error, reject);
@@ -236,11 +239,15 @@ class Wallet {
             try {
                 this.validate(to, amount);
                 let coin = this.provider.Coin();
-                let data = await coin.transfer(this.connectedAccount, to, amount);
-                
-                this.sendTransaction(data)
-                .then((transactionId) => {
-                    resolve(this.provider.Transaction(transactionId));
+                coin.transfer(this.connectedAccount, to, amount)
+                .then((data) => {
+                    this.sendTransaction(data)
+                    .then((transactionId) => {
+                        resolve(this.provider.Transaction(transactionId));
+                    })
+                    .catch((error) => {
+                        utils.rejectMessage(error, reject);
+                    });
                 })
                 .catch((error) => {
                     utils.rejectMessage(error, reject);
