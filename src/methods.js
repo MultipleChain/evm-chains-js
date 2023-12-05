@@ -38,60 +38,92 @@ class Methods {
         return new this.web3Provider.eth.Contract(abi);
     }
 
-    checkResult(result) {
-        if (result.error) {
-            if (result.error.code == -32000) {
-                throw new Error('rpc-timeout');
-            }
-            throw new Error(result.error.message);
-        }
-        return result;
-    }
-
     /**
      * @param {Object} data 
      * @returns {String}
      */
-    async getEstimateGas(data) {
-        return utils.hex((this.checkResult(await this.web3Provider.eth.estimateGas(data))).toString());
+    getEstimateGas(data) {
+        return new Promise((resolve) => {
+            this.web3Provider.eth.estimateGas(data, (error, gas) => {
+                if (error) {
+                    throw error;
+                }
+                resolve(utils.hex(gas.toString()));
+            });
+        });
     }
 
     /**
      * @returns {String}
      */
-    async getGasPrice() {
-        return utils.hex((this.checkResult(await this.web3Provider.eth.getGasPrice())).toString());
+    getGasPrice() {
+        return new Promise((resolve) => {
+            this.web3Provider.eth.getGasPrice((error, gasPrice) => {
+                if (error) {
+                    throw error;
+                }
+                resolve(utils.hex(gasPrice.toString()));
+            });
+        });
     }
     
     /**
      * @param ...args
      * @returns {Object}
      */
-    async getBlock(...args) {
-        return this.checkResult(await this.web3Provider.eth.getBlock(...args));
+    getBlock(...args) {
+        return new Promise((resolve) => {
+            this.web3Provider.eth.getBlock(...args, (error, block) => {
+                if (error) {
+                    throw error;
+                }
+                resolve(block);
+            });
+        });
     }
     
     /**
      * @returns {Number}
      */
-    async getBlockNumber() {
-        return this.checkResult(await this.web3Provider.eth.getBlockNumber());
+    getBlockNumber() {
+        return new Promise((resolve) => {
+            this.web3Provider.eth.getBlockNumber((error, blockNumber) => {
+                if (error) {
+                    throw error;
+                }
+                resolve(blockNumber);
+            });
+        });
     }
 
     /**
      * @param {String} hash 
      * @returns {Object}
      */
-    async getTransaction(hash) {
-        return this.checkResult(await this.web3Provider.eth.getTransaction(hash));
+    getTransaction(hash) {
+        return new Promise((resolve) => {
+            this.web3Provider.eth.getTransaction(hash, (error, transaction) => {
+                if (error) {
+                    throw error;
+                }
+                resolve(transaction);
+            });
+        });
     }
 
     /**
      * @param {String} hash 
      * @returns {Object}
      */
-    async getTransactionReceipt(hash) {
-        return this.checkResult(await this.web3Provider.eth.getTransactionReceipt(hash));
+    getTransactionReceipt(hash) {
+        return new Promise((resolve) => {
+            this.web3Provider.eth.getTransactionReceipt(hash, (error, transaction) => {
+                if (error) {
+                    throw error;
+                }
+                resolve(transaction);
+            });
+        });
     }
 
     /**
@@ -99,7 +131,14 @@ class Methods {
      * @returns {Number}
      */
     async getBalance(address) {
-        return this.checkResult(await this.web3Provider.eth.getBalance(address));
+        return new Promise((resolve ,reject) => {
+            this.web3Provider.eth.getBalance(address, 'latest', (error, balance) => {
+                if (error) {
+                    throw error;
+                }
+                resolve(balance);
+            });
+        })
     }
     
 }

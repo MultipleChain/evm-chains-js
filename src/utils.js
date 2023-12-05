@@ -6,7 +6,6 @@ module.exports = Object.assign(utils, {
         return Web3Utils.isAddress(address);
     },
     rejectMessage(error, reject) {
-        console.log(error);
         if (
             error.message == 'Not supported chainId' || 
             String(error.message).indexOf('chain ID') > -1 ||
