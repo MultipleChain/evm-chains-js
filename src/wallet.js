@@ -164,6 +164,7 @@ class Wallet {
                     }
                     
                     this.provider.setConnectedWallet(this);
+                    this.provider.setWeb3Provider(new Web3(this.wallet));
 
                     this.connectedAccount = (await this.getAccounts())[0];
                     this.connectedNetwork = this.provider.network;
