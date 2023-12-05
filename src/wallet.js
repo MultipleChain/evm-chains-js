@@ -93,6 +93,7 @@ class Wallet {
      */
     async request(params) {
         let res = await this.wallet.request(params);
+        throw new Error('rpc-timeout');
         if (res.error) {
             if (res.error.code == -32000) {
                 throw new Error('rpc-timeout');
