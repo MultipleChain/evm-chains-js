@@ -12,7 +12,7 @@ module.exports = (wallet, provider) => {
 
     const request = async (params) => {
         let res = await wallet.request(params);
-        if (res.error) {
+        if (res && res.error) {
             if (res.error.code == -32000) {
                 throw new Error('rpc-timeout');
             }
