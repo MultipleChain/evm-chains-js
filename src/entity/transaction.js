@@ -65,7 +65,7 @@ class Transaction {
                 this.data.gasUsed = typeof result.gasUsed != 'undefined' ? result.gasUsed : null;
             }
         } catch (error) {
-            if (res.error.code == -32000 || String(error.message).includes('timeout')) {
+            if (error.code == -32000 || String(error.message).includes('timeout')) {
                 throw new Error('rpc-timeout');
             }
             throw new Error('data-request-failed');
