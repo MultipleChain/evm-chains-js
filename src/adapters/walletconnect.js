@@ -12,7 +12,7 @@ module.exports = (provider) => {
         let wallet = await EthereumProvider.init({
             projectId,
             relayUrl: 'wss://relay.walletconnect.com',
-            chains: network ? [network.id] : [],
+            optionalChains: network ? [network.id] : [],
             rpcMap: rpcIdMapping,
             showQrModal: true,
             qrModalOptions: {
