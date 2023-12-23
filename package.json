@@ -1,7 +1,7 @@
 {
   "namespace": "multiplechain",
   "name": "@multiplechain/evm-chains",
-  "version": "0.1.58",
+  "version": "0.2.0",
   "description": "A library that makes it easy to connect to EVM-based wallets and make transactions quickly.",
   "scripts": {
     "serve": "parcel test.html --no-cache --dist-dir test",
@@ -40,8 +40,8 @@
     "@walletconnect/modal": "^2.6.2",
     "abi-decoder": "^2.4.0",
     "bignumber.js": "^9.0.2",
-    "os": "^0.1.2",
-    "web3": "^1.10.3"
+    "ethers": "^6.9.1",
+    "os": "^0.1.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.11.6",
@@ -57,7 +57,8 @@
     "crypto-browserify": "^3.12.0",
     "https-browserify": "^1.0.0",
     "os-browserify": "^0.3.0",
-    "parcel": "^2.8.2",
+    "parcel": "^2.10.3",
+    "process": "^0.11.10",
     "punycode": "^1.4.1",
     "querystring-es3": "^0.2.1",
     "stream-browserify": "^3.0.0",
