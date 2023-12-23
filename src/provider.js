@@ -6,8 +6,6 @@ const Token = require('./entity/token');
 const Contract = require('./entity/contract');
 const Transaction = require('./entity/transaction');
 const wagmiChains = require('@wagmi/chains');
-const Web3Modal = require('@multiplechain/web3modal');
-const { resolve } = require('url');
 
 class Provider {
 
@@ -230,6 +228,8 @@ class Provider {
      * @returns {Web3Modal}
      */
     createWeb3Modal() {
+        const Web3Modal = require('@multiplechain/web3modal');
+        
         if (this.web3Modal) return this.web3Modal;
 
         this.web3Modal = new Web3Modal({
