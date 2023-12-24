@@ -1,4 +1,4 @@
-const utils = require('./utils');
+const utils = require('../utils');
 const ethers = require('ethers');
 
 class Methods {

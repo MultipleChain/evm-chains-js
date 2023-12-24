@@ -1,5 +1,5 @@
-const ethers = require('ethers');
 const utils = require('./utils');
+const choose = require('./choose-package');
 const getAdapter = require('./get-adapter');
 
 class Wallet {
@@ -164,7 +164,8 @@ class Wallet {
                     }
                     
                     this.provider.setConnectedWallet(this);
-                    this.provider.setWeb3Provider(new ethers.BrowserProvider(this.wallet));
+                    let providers = choose(this.provider.package);
+                    this.provider.setWeb3Provider(new providers.Web3Provider(this.wallet));
 
                     this.connectedAccount = (await this.getAccounts())[0];
                     this.connectedNetwork = this.provider.network;
@@ -309,6 +310,62 @@ class Wallet {
      * @returns {Prmise<Object>}
      */
     deployContract(abi, byteCode, args = [], value = null) {
+        if (this.provider.package === 'web3') {
+            return this.web3DeployContract(abi, byteCode, args);
+        } else {
+            return this.ethersDeployContract(abi, byteCode, args, value);
+        }
+    }
+
+    /**
+     * @param {Array} abi 
+     * @param {String} byteCode 
+     * @param  {Array} args 
+     * @returns {Prmise<Object>}
+     */
+    web3DeployContract(abi, byteCode, args) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                let contract = this.provider.methods.contractFactory(abi);
+                let deployer = contract.deploy({
+                    data: byteCode,
+                    arguments: args
+                });
+
+                let estimateGas = await this.provider.methods.getEstimateGas({
+                    from: this.connectedAccount,
+                    data: deployer.encodeABI()
+                });
+                
+                if (!estimateGas) {
+                    return reject('transaction-create-fail');
+                }
+
+                deployer.send({
+                    gas: estimateGas,
+                    from: this.connectedAccount
+                })
+                .then(function(newContractInstance){
+                    resolve(newContractInstance);
+                })
+                .catch(function(error){
+                    utils.rejectMessage(error, reject);
+                });
+            } catch (error) {
+                utils.rejectMessage(error, reject);
+            }
+        });
+    }
+
+    /**
+     * @param {Array} abi 
+     * @param {String} byteCode 
+     * @param  {Array} args 
+     * @param {Number} value
+     * @returns {Prmise<Object>}
+     */
+    ethersDeployContract(abi, byteCode, args = [], value = null) {
         return new Promise(async (resolve, reject) => {
             try {
                 let factory = this.provider.methods.contractFactory(

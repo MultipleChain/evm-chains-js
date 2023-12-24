@@ -1,8 +1,7 @@
-const ethers = require('ethers');
 const utils = require('./utils');
-const Methods = require('./methods');
 const Coin = require('./entity/coin');
 const Token = require('./entity/token');
+const choose = require('./choose-package');
 const wagmiChains = require('@wagmi/chains');
 const Contract = require('./entity/contract');
 const Transaction = require('./entity/transaction');
@@ -50,6 +49,11 @@ class Provider {
     web3Modal;
 
     /**
+     * @var {String}
+     */
+    package = 'web3';
+
+    /**
      * @var {Object}
      */
     network = {};
@@ -81,6 +85,7 @@ class Provider {
 
         this.testnet = options.testnet;
         this.wcProjectId = options.wcProjectId;
+        this.package = options.package || 'web3';
         this.wcThemeMode = options.wcThemeMode || 'light';
         this.wcCustomWallets = options.wcCustomWallets || [];
 
@@ -126,11 +131,13 @@ class Provider {
             throw new Error('Invalid network!');
         }
 
-        this.setWeb3Provider(new ethers.JsonRpcProvider(network.rpcUrl));
+        let providers = choose(this.package);
 
-        if (network.wsUrl) {
+        this.setWeb3Provider(new providers.HttpProvider(this.network.rpcUrl));
+
+        if (this.network.wsUrl) {
             this.qrPayments = true;
-            this.web3ws = new ethers.WebSocketProvider(network.wsUrl);
+            this.web3ws = new providers.WebsocketProvider(this.network.wsUrl);
         }
     }
 
@@ -144,6 +151,62 @@ class Provider {
      * @returns {Object}
      */
     async listenTransactions(options, callback) {
+        if (this.package === 'web3') {
+            this.web3ListenTransactions(options, callback);
+        } else {
+            this.ethersListenTransactions(options, callback);
+        }
+    }
+
+    /**
+     * @param {Object} options
+     * @param {Function} callback
+     * @returns {Object}
+     */
+    async web3ListenTransactions(options, callback) {
+        let receiver = options.receiver;
+        let tokenAddress = options.tokenAddress;
+        if (this.web3ws) {
+            if (tokenAddress) {
+                receiver = receiver.replace('0x', '');
+                receiver = receiver.toLowerCase();
+                receiver = "0x000000000000000000000000" + receiver;
+                let subscription = this.web3ws.eth.subscribe('logs', {
+                    address: tokenAddress,
+                    topics: [null, null, receiver]
+                });
+            
+                subscription.on("data", (data) =>  {
+                    callback(subscription, this.Transaction(data.transactionHash));
+                });
+            } else {
+                let balance = await this.methods.getBalance(receiver);
+                let subscription = this.web3ws.eth.subscribe('newBlockHeaders');
+
+                subscription.on("data", async (blockHeader) => {
+                    let newbalance = await this.methods.getBalance(receiver);
+                    if (balance < newbalance) {
+                        balance = await this.methods.getBalance(receiver);
+                        let currentBlock = await this.methods.getBlock(blockHeader.hash, true);
+                        currentBlock.transactions.forEach(transaction => {
+                            if (transaction.to && transaction.to.toLowerCase() == receiver.toLowerCase()) {
+                                callback(subscription, this.Transaction(transaction.hash));
+                            }
+                        });
+                    }
+                });
+            }
+        } else {
+            throw new Error('Websocket provider not found!');
+        }
+    }
+
+    /**
+     * @param {Object} options
+     * @param {Function} callback
+     * @returns {Object}
+     */
+    async ethersListenTransactions(options, callback) {
         const receiver = options.receiver;
         const tokenAddress = options.tokenAddress;
         const subscription = {
@@ -192,6 +255,7 @@ class Provider {
      * @param {Object} web3Provider 
      */
     setWeb3Provider(web3Provider) {
+        const Methods = this.package === 'web3' ? require('./methods/web3') : require('./methods/ethers');
         this.methods = new Methods(this, this.web3 = web3Provider);
     }
 
