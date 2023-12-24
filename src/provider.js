@@ -3,9 +3,9 @@ const utils = require('./utils');
 const Methods = require('./methods');
 const Coin = require('./entity/coin');
 const Token = require('./entity/token');
+const wagmiChains = require('@wagmi/chains');
 const Contract = require('./entity/contract');
 const Transaction = require('./entity/transaction');
-const wagmiChains = require('@wagmi/chains');
 
 class Provider {
 

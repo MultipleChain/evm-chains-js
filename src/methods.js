@@ -89,10 +89,10 @@ class Methods {
     }
 
     /**
-     * @param {String} hash 
+     * @param {String} address
      * @returns {Number}
      */
-    async getBalance(address) {
+    getBalance(address) {
         return this.web3Provider.getBalance(address);
     }
     

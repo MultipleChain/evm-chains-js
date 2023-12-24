@@ -22,7 +22,7 @@ module.exports = (wallet, provider) => {
         return res;
     }
 
-    this.addNetwork = (network) => {
+    const addNetwork = (network) => {
         return new Promise(async (resolve, reject) => {
             try {
                 network = networks.find(n => n.id == network.id);
@@ -49,7 +49,7 @@ module.exports = (wallet, provider) => {
         });
     }
 
-    this.changeNetwork = (network) => {
+    const changeNetwork = (network) => {
         network = JSON.parse(JSON.stringify(network));
         return new Promise(async (resolve, reject) => {
             let chainId = network.hexId || hex(network.id);
@@ -65,7 +65,7 @@ module.exports = (wallet, provider) => {
                     error.code === 4902 ||
                     String(error.message).indexOf('wallet_addEthereumChain') > -1    
                 ) {
-                    this.addNetwork(network)
+                    addNetwork(network)
                     .then(() => {
                         resolve(true);
                     })
@@ -79,19 +79,19 @@ module.exports = (wallet, provider) => {
         });
     }
 
-    this.getChainHexId = async () => {
+    const getChainHexId = async () => {
         let id = await request({method: 'eth_chainId'});
         if (id == '0x01') return '0x1';
         if (!String(id).startsWith('0x')) return '0x' + id.toString(16);
         return id;
     }
 
-    this.maybeSwitch = () => {
+    const maybeSwitch = () => {
         return new Promise(async (resolve, reject) => {
             try {
                 let chainId = network.hexId || hex(network.id);
-                if (await this.getChainHexId() != chainId) {
-                    this.changeNetwork(network)
+                if (await getChainHexId() != chainId) {
+                    changeNetwork(network)
                     .then(() => {
                         resolve(true);
                     })
@@ -107,5 +107,5 @@ module.exports = (wallet, provider) => {
         });
     }
 
-    return this.maybeSwitch(wallet, provider);
+    return maybeSwitch(wallet, provider);
 }
