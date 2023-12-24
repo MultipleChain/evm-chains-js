@@ -1,21 +1,22 @@
-module.exports = trustWallet = (provider) => {
-    const wallet = window.ethereum;
-    const testnet = provider.testnet
-    const switcher = require('./switcher.js')(wallet, provider);
+const switcher = require('./switcher.js');
+
+module.exports = (provider) => {
+
+    const wallet = window?.ethereum?.isTrust ? window.ethereum : window.trustwallet;
 
     const connect = async () => {
         return new Promise(async (resolve, reject) => {
             try {
                 wallet.request({ method: 'eth_requestAccounts' })
-                .then(async (accounts) => {
+                .then(async () => {
 
-                    if (testnet) {
-                        return resolve(accounts[0]);
+                    if (window?.ethereum?.isTrust && provider.testnet) {
+                        return resolve(wallet);
                     }
 
-                    switcher.maybeSwitch()
+                    switcher(wallet, provider)
                     .then(() => {
-                        resolve(accounts[0]);
+                        resolve(wallet);
                     })
                     .catch((error) => {
                         reject(error);
@@ -33,10 +34,12 @@ module.exports = trustWallet = (provider) => {
     return {
         key: 'trustwallet',
         name: 'Trust Wallet',
-        type: 'mobile',
-        wallet,
+        supports: [
+            'browser',
+            'mobile'
+        ],
         connect,
-        deepLink: "https://link.trustwallet.com/open_url?coin_id=60&url=",
-        download: 'https://trustwallet.com/download'
+        download: 'https://trustwallet.com/download',
+        isDetected : () => Boolean(window?.ethereum?.isTrust || window?.trustwallet)
     }
 }

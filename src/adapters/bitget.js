@@ -1,8 +1,8 @@
 const switcher = require('./switcher.js');
 
 module.exports = (provider) => {
-    
-    const wallet = window.ethereum;
+
+    const wallet = window?.bitkeep?.ethereum;
 
     const connect = async () => {
         return new Promise(async (resolve, reject) => {
@@ -27,15 +27,15 @@ module.exports = (provider) => {
     }
 
     return {
-        key: 'metamask',
-        name: 'MetaMask',
+        key: 'bitget',
+        name: 'Bitget Wallet',
         supports: [
             'browser',
             'mobile'
         ],
         connect,
-        deepLink: 'https://metamask.app.link/dapp/{siteUrl}',
-        download: 'https://metamask.io/download/',
-        isDetected: () => Boolean(window?.ethereum?.isMetaMask)
+        deepLink: 'https://bkcode.vip?action=dapp&url={siteUrl}',
+        download: 'https://web3.bitget.com/en/wallet-download?type=3',
+        isDetected : () => Boolean(window.bitkeep && window.bitkeep.ethereum)
     }
 }

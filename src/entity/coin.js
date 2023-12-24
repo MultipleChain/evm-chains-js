@@ -45,40 +45,50 @@ class Coin {
      * @returns {Float}
      */
     async getBalance(address) {
-        let balance = await this.provider.methods.getBalance(address);
-        return parseFloat((parseInt(balance) / 10**this.decimals).toFixed(6));
+        try {
+            let balance = await this.provider.methods.getBalance(address);
+            return parseFloat((parseInt(balance) / 10**this.decimals).toFixed(6));
+        } catch (error) {
+            throw error;
+        }
     }
 
     /**
+     * @param {String} from
      * @param {String} to 
      * @param {Float|Integer} amount 
      * @returns {String|Object}
      */
     transfer(from, to, amount) {
         return new Promise(async (resolve, reject) => {
+            try {
+                if (parseFloat(amount) > await this.getBalance(from)) {
+                    return reject('insufficient-balance');
+                }
 
-            if (parseFloat(amount) > await this.getBalance(from)) {
-                return reject('insufficient-balance');
+                if (parseFloat(amount) < 0) {
+                    return reject('transfer-amount-error');
+                }
+
+                amount = utils.toHex(amount, this.decimals);
+                
+                let gas = await this.provider.methods.getEstimateGas({
+                    to,
+                    from,
+                    value: amount,
+                    data: "0x",
+                });
+
+                return resolve([{
+                    to,
+                    from,
+                    value: amount,
+                    gas,
+                    data: "0x",
+                }]);
+            } catch (error) {
+                reject(error);
             }
-
-            if (parseFloat(amount) < 0) {
-                return reject('transfer-amount-error');
-            }
-
-            amount = utils.toHex(amount, this.decimals);
-            
-            let gas = await this.provider.methods.getEstimateGas({
-                to,
-                from,
-                value: amount
-            });
-
-            return resolve([{
-                to,
-                from,
-                value: amount,
-                gas
-            }]);
         });
     }
 }

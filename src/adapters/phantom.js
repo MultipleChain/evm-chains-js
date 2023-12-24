@@ -1,10 +1,12 @@
 module.exports = () => {
-    const wallet = window.BinanceChain;
+    
+    const wallet = window?.phantom?.ethereum;
+
     const connect = async () => {
         return new Promise(async (resolve, reject) => {
             try {
                 wallet.request({ method: 'eth_requestAccounts' })
-                .then(() => {
+                .then(async () => {
                     resolve(wallet);
                 })
                 .catch(error => {
@@ -17,13 +19,15 @@ module.exports = () => {
     }
 
     return {
-        key: 'binancewallet',
-        name: 'Binance Wallet',
+        key: 'phantom',
+        name: 'Phantom',
         supports: [
-            'browser'
+            'browser',
+            'mobile'
         ],
         connect,
-        download: 'https://chrome.google.com/webstore/detail/binance-wallet/fhbohimaelbohpjbbldcngcnapndodjp',
-        isDetected: () => Boolean(window?.BinanceChain?.bnbSign) 
+        deepLink: 'https://phantom.app/ul/browse/{siteUrl}?ref={siteUrl}',
+        download: 'https://phantom.app/',
+        isDetected: () => Boolean(window.phantom?.ethereum)
     }
 }

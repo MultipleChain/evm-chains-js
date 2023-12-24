@@ -1,15 +1,36 @@
-module.exports = switcher = (wallet, provider) => {
+module.exports = (wallet, provider) => {
     const network = provider.network;
-    const {isNumeric, hex} = require('../utils.js');
+    const networks = provider.networks;
+    
+    if (!network) {
+        return new Promise(async (resolve) => {
+            resolve(true);
+        });
+    }
 
+    const {hex} = require('../utils.js');
 
-    this.addNetwork = (network) => {
+    const request = async (params) => {
+        let res = await wallet.request(params);
+        if (res && res.error) {
+            if (res.error.code == -32000) {
+                throw new Error('rpc-timeout');
+            }
+            throw new Error(res.error.message);
+            
+        }
+        return res;
+    }
+
+    const addNetwork = (network) => {
         return new Promise(async (resolve, reject) => {
             try {
-                wallet.request({
+                network = networks.find(n => n.id == network.id);
+                let chainId = network.hexId || hex(network.id);
+                request({
                     method: 'wallet_addEthereumChain',
                     params: [{
-                        chainId: network.hexId,
+                        chainId,
                         chainName: network.name,
                         rpcUrls: [network.rpcUrl],
                         nativeCurrency: network.nativeCurrency,
@@ -28,12 +49,13 @@ module.exports = switcher = (wallet, provider) => {
         });
     }
 
-    this.changeNetwork = (network) => {
+    const changeNetwork = (network) => {
         network = JSON.parse(JSON.stringify(network));
         return new Promise(async (resolve, reject) => {
-            wallet.request({
+            let chainId = network.hexId || hex(network.id);
+            request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: network.hexId }],
+                params: [{ chainId }],
             })
             .then(() => {
                 resolve(true);
@@ -43,7 +65,7 @@ module.exports = switcher = (wallet, provider) => {
                     error.code === 4902 ||
                     String(error.message).indexOf('wallet_addEthereumChain') > -1    
                 ) {
-                    this.addNetwork(network)
+                    addNetwork(network)
                     .then(() => {
                         resolve(true);
                     })
@@ -57,17 +79,19 @@ module.exports = switcher = (wallet, provider) => {
         });
     }
 
-    this.getChainHexId = async () => {
-        let id = await wallet.request({method: 'eth_chainId'});
-        if (isNumeric(id)) return hex(id);
+    const getChainHexId = async () => {
+        let id = await request({method: 'eth_chainId'});
+        if (id == '0x01') return '0x1';
+        if (!String(id).startsWith('0x')) return '0x' + id.toString(16);
         return id;
     }
 
-    this.maybeSwitch = () => {
+    const maybeSwitch = () => {
         return new Promise(async (resolve, reject) => {
             try {
-                if (await this.getChainHexId() != network.hexId) {
-                    this.changeNetwork(network)
+                let chainId = network.hexId || hex(network.id);
+                if (await getChainHexId() != chainId) {
+                    changeNetwork(network)
                     .then(() => {
                         resolve(true);
                     })
@@ -83,5 +107,5 @@ module.exports = switcher = (wallet, provider) => {
         });
     }
 
-    return this;
+    return maybeSwitch(wallet, provider);
 }

@@ -1,3 +1,5 @@
+const utils = require('../utils');
+
 class Contract {
 
     /**
@@ -16,6 +18,11 @@ class Contract {
     contract;
 
     /**
+     * @var {Object}
+     */
+    methods;
+
+    /**
      * @var {Number}
      */
     defaultGas = 50000;
@@ -29,6 +36,7 @@ class Contract {
         this.address = address;
         this.provider = provider;
         this.contract = provider.methods.contract(address, abi);
+        this.methods = this.contract.methods;
     }
 
     /**
@@ -40,20 +48,43 @@ class Contract {
 
     /**
      * @param {String} method
-     * @param  {...any} data 
+     * @param  {Array} args 
      * @returns {String}
      */
-    getData(method, ...data) {
-        return this.contract[method].getData(...data);
+    getData(method, args) {
+        return this.methods[method](...args).encodeABI();
     }
 
     /**
-     * @param {String} method 
-     * @param  {...any} params 
-     * @returns {Promise}
+     * @param {String} method
+     * @param  {Array} args 
+     * @param {Object} ops
+     * @returns {String}
      */
-    call(method, ...params) {
-        return this.contract[method](...params);
+    async getEstimateGas(method, args, ops) {
+        return utils.hex((await this.methods[method](...args).estimateGas(ops)));
+    }
+
+    /**
+     * 
+     * @param {String} method 
+     * @param  {Array} args 
+     * @param {Object} options
+     * @returns {any}
+     */
+    call(method, args = [], options = {}) {
+        return this.methods[method](...args).call(options);
+    }
+
+    /**
+     * 
+     * @param {String} method 
+     * @param  {Array} args 
+     * @param {Object} options
+     * @returns {any}
+     */
+    send(method, args = [], options = {}) {
+        return this.methods[method](...args).send(options);
     }
 }
 

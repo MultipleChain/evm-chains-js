@@ -1,8 +1,8 @@
 const switcher = require('./switcher.js');
 
 module.exports = (provider) => {
-    
-    const wallet = window.ethereum;
+
+    const wallet = window?.okxwallet;
 
     const connect = async () => {
         return new Promise(async (resolve, reject) => {
@@ -27,15 +27,15 @@ module.exports = (provider) => {
     }
 
     return {
-        key: 'metamask',
-        name: 'MetaMask',
+        key: 'okx',
+        name: 'Okx Wallet',
         supports: [
             'browser',
             'mobile'
         ],
         connect,
-        deepLink: 'https://metamask.app.link/dapp/{siteUrl}',
-        download: 'https://metamask.io/download/',
-        isDetected: () => Boolean(window?.ethereum?.isMetaMask)
+        deepLink: 'okx://wallet/dapp/details?dappUrl={siteUrl}',
+        download: 'https://www.okx.com/download',
+        isDetected : () => Boolean(window?.okxwallet?.isOkxWallet),
     }
 }

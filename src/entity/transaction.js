@@ -59,17 +59,15 @@ class Transaction {
     async getData() {
         try {
             this.data = await this.provider.methods.getTransaction(this.hash);
-        } catch (error) {
-            throw new Error('data-request-failed');
-        }
-
-        try {
             let result = await this.provider.methods.getTransactionReceipt(this.hash);
             if (result) {
                 this.data.status = typeof result.status != 'undefined' ? result.status : null;
                 this.data.gasUsed = typeof result.gasUsed != 'undefined' ? result.gasUsed : null;
             }
         } catch (error) {
+            if (error.code == -32000 || String(error.message).includes('timeout')) {
+                throw new Error('rpc-timeout');
+            }
             throw new Error('data-request-failed');
         }
 
@@ -79,7 +77,10 @@ class Transaction {
     /**
      * @returns {Object}
      */
-    decodeInput() {
+    async decodeInput() {
+        if (!this.data) {
+            await this.getData();
+        }
         if (this.data.input != '0x') {
             let decodedInput = utils.abiDecoder(this.data.input);
             let receiver = decodedInput.params[0].value;
@@ -91,14 +92,29 @@ class Transaction {
     }
 
     /**
+     * @param {Object} options 
+     * @returns {Number}
+     */
+    async getTransferAmount(options) {
+        let data = await this.getData();
+        let tokenAddress = options.tokenAddress;
+        if (tokenAddress) {
+            let decodedInput = await this.decodeInput();
+            return utils.toDec(decodedInput.amount, (await this.provider.Token(tokenAddress).getDecimals()));
+        } else {
+            return utils.toDec(data.value, (await this.provider.Coin().getDecimals()));
+        }
+    }
+
+    /**
      * @returns {Number}
      */
     async getConfirmations() {
         try {
-            if (!this.data) await this.getData();
-            const currentBlock = await this.provider.methods.getBlockNumber();
-            if (this.data.blockNumber === null) return 0;
-            let blockNumber = utils.toDec(this.data.blockNumber, 0);
+            let data = await this.getData();
+            let currentBlock = await this.provider.methods.getBlockNumber();
+            if (data.blockNumber === null) return 0;
+            let blockNumber = utils.toDec(data.blockNumber, 0);
             let confirmations = currentBlock - blockNumber;
             return confirmations < 0 ? 0 : confirmations;
         } catch (error) {}
@@ -113,11 +129,11 @@ class Transaction {
         return new Promise((resolve, reject) => {
             try {
                 this.intervalConfirm = setInterval(async () => {
-                    const trxConfirmations = await this.getConfirmations(this.hash)
+                    const txConfirmations = await this.getConfirmations(this.hash)
         
-                    if (trxConfirmations >= confirmations) {
+                    if (txConfirmations >= confirmations) {
                         clearInterval(this.intervalConfirm);
-                        return resolve(trxConfirmations);
+                        return resolve(txConfirmations);
                     }
                 }, (timer*1000));
             } catch (error) {
@@ -130,47 +146,35 @@ class Transaction {
      * @param {Number} timer 
      * @returns {Boolean}
      */
-    validateTransaction(timer = 1) {
+    async validate(timer = 1) {
         timer = this.timer || timer;
-        return new Promise((resolve, reject) => {
-            this.intervalValidate = setInterval(async () => {
-                try {
+        try {
+            await this.getData();
 
-                    await this.getData();
+            let result = null;
 
-                    let result = null;
-
-                    if (this.data == null) {
-                        result = false;
-                    } else {
-                        if (this.data.blockNumber !== null) {
-                            if (this.data.status == '0x0') {
-                                result = false;
-                            } else {
-                                result = true;
-                            }
-                        }
-                    }
-    
-                    if (typeof result == 'boolean') {
-                        clearInterval(this.intervalValidate);
-                        if (result == true) {
-                            resolve(true);
-                        } else {
-                            reject(false);
-                        }
-                    }
-    
-                } catch (error) {
-                    if (error.message == 'data-request-failed') {
-                        this.validateTransaction(timer);
-                    } else {
-                        clearInterval(this.intervalValidate);
-                        reject(error);
-                    }
+            if (this.data && this.data.blockNumber !== null) {
+                if (this.data.status == '0x0') {
+                    result = false;
+                } else {
+                    result = true;
                 }
-            }, (timer*1000));
-        });
+            }
+
+            if (typeof result == 'boolean') {
+                return result;
+            }
+
+            await new Promise(r => setTimeout(r, (timer*1000)));
+
+            return this.validate(timer);
+        } catch (error) {
+            if (error.message == 'data-request-failed') {
+                return this.validate(timer);
+            } else {
+                throw error;
+            }
+        }
     }
 
     /**
@@ -182,7 +186,7 @@ class Transaction {
             throw new Error('invalid-token-address');
         }
 
-        if (await this.validateTransaction()) {
+        if (await this.validate()) {
             if (this.data.input == '0x') {
                 return false;
             } else {
@@ -197,7 +201,7 @@ class Transaction {
      * @returns {Boolean}
      */
     async verifyCoinTransfer() {
-        if (await this.validateTransaction()) {
+        if (await this.validate()) {
             if (this.data.value == '0x0') {
                 return false;
             } else {
@@ -220,7 +224,7 @@ class Transaction {
         }
 
         if (await this.verifyTokenTransfer(address)) {
-            let decodedInput = this.decodeInput();
+            let decodedInput = await this.decodeInput();
             let token = this.provider.Token(address);
 
             let data = {
@@ -295,6 +299,9 @@ class Transaction {
      * @returns {String}
      */
     getUrl() {
+        if (!this.provider.network.explorerUrl) {
+            throw new Error('explorer-url-not-found');
+        }
         let explorerUrl = this.provider.network.explorerUrl;
         explorerUrl += explorerUrl.endsWith('/') ? '' : '/';
         explorerUrl += 'tx/'+this.hash;

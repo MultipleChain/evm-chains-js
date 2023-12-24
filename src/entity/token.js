@@ -14,6 +14,11 @@ class Token {
     contract;
     
     /**
+     * @var {Object}
+     */
+    methods;
+
+    /**
      * @var {Object} 
      */
     provider;
@@ -27,6 +32,7 @@ class Token {
         this.address = address;
         this.provider = provider;
         this.contract = provider.Contract(address, abi || ABI);
+        this.methods = this.contract.methods;
     }
 
     /**
@@ -40,21 +46,21 @@ class Token {
      * @returns {String|Object}
      */
     getName() {
-        return this.contract.call('name');
+        return this.methods.name().call();
     }
 
     /**
      * @returns {String|Object}
      */
     getSymbol() {
-        return this.contract.call('symbol');
+        return this.methods.symbol().call();
     }
 
     /**
      * @returns {String|Object}
      */
     getDecimals() {
-        return this.contract.call('decimals');
+        return this.methods.decimals().call();
     }
 
     /**
@@ -62,7 +68,7 @@ class Token {
      */
     async getTotalSupply() {
         let decimals = await this.getDecimals();
-        let totalSupply = await this.contract.call('totalSupply');
+        let totalSupply = await this.methods.totalSupply().call();
         return utils.toDec(totalSupply, decimals);
     }
 
@@ -72,47 +78,42 @@ class Token {
      */
     async getBalance(address) {
         let decimals = await this.getDecimals();
-        let balance = await this.contract.call('balanceOf', address);
+        let balance = await this.methods.balanceOf(address).call();
         return utils.toDec(balance, decimals);
     }
 
     /**
+     * @param {String} from
      * @param {String} to
      * @param {Integer} amount
      * @returns {String|Object}
      */
     transfer(from, to, amount) {
         return new Promise(async (resolve, reject) => {
+            try {
+                if (parseFloat(amount) > await this.getBalance(from)) {
+                    return reject('insufficient-balance');
+                }
     
-            if (parseFloat(amount) > await this.getBalance(from)) {
-                return reject('insufficient-balance');
+                if (parseFloat(amount) < 0) {
+                    return reject('transfer-amount-error');
+                }
+    
+                amount = utils.toHex(amount, (await this.getDecimals()));
+    
+                let data = await this.contract.getData('transfer', [to, amount]);
+                let gas = await this.contract.getEstimateGas('transfer', [to, amount], {from});
+    
+                return resolve([{
+                    to: this.address,
+                    value: '0x0',
+                    from,
+                    gas,
+                    data
+                }]);
+            } catch (error) {
+                reject(error);
             }
-
-            if (parseFloat(amount) < 0) {
-                return reject('transfer-amount-error');
-            }
-
-            amount = utils.toHex(amount, (await this.getDecimals()));
-
-            let data = this.contract.getData('transfer', to, amount, {from});
-            
-            let gasPrice = await this.provider.methods.getGasPrice();
-
-            let gas = await this.provider.methods.getEstimateGas({
-                to: this.address,
-                value: '0x0',
-                from,
-                data
-            });
-
-            return resolve([{
-                to: this.address,
-                value: '0x0',
-                gasPrice,
-                from,
-                gas,
-                data
-            }]);
         });
     }
 
@@ -123,24 +124,22 @@ class Token {
      */
     approve(from, spender, amount) {
         return new Promise(async (resolve, reject) => {
-            amount = utils.toHex(amount, (await this.getDecimals()));
-            
-            let data = this.contract.getData('approve', spender, amount, {from});
-            
-            let gas = await this.provider.methods.getEstimateGas({
-                to: this.address,
-                value: '0x0',
-                from,
-                data
-            });
-
-            return resolve([{
-                to: this.address,
-                value: '0x0',
-                from,
-                gas,
-                data
-            }]);
+            try {
+                amount = utils.toHex(amount, (await this.getDecimals()));
+                
+                let data = this.contract.getData('approve', [spender, amount]);
+                let gas = await this.contract.getEstimateGas('approve', [spender, amount], {from});
+                
+                return resolve([{
+                    to: this.address,
+                    value: '0x0',
+                    from,
+                    gas,
+                    data
+                }]);
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 
@@ -151,7 +150,7 @@ class Token {
      */
     async allowance(owner, spender) {
         return parseFloat(utils.toDec(
-            await this.contract.call('allowance', owner, spender), 
+            await this.methods.allowance(owner, spender).call(), 
             await this.getDecimals()
         ));
     }

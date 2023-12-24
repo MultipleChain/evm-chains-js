@@ -1,5 +1,5 @@
 const utils = require('./utils');
-const {ethers} = require('ethers');
+const ethers = require('ethers');
 
 class Methods {
 
@@ -19,16 +19,27 @@ class Methods {
      */
     constructor(provider, web3Provider) {
         this.provider = provider;
-        this.web3Provider = web3Provider
+        this.web3Provider = web3Provider;
     }
 
     /**
      * @param {String} address 
      * @param {Array} abi 
+     * @param {Object} provider
      * @returns {Object}
      */
-    contract(address, abi) {
-        return new ethers.Contract(address, abi, this.web3Provider);
+    contract(address, abi, provider = null) {
+        return new ethers.Contract(address, abi, provider);
+    }
+
+    /**
+     * @param {Array} abi
+     * @param {String} bytecode
+     * @param {Object} signer
+     * @returns {Object}
+     */
+    contractFactory(abi, bytecode, signer = null) {
+        return new ethers.ContractFactory(abi, bytecode, signer);
     }
 
     /**
@@ -44,6 +55,14 @@ class Methods {
      */
     async getGasPrice() {
         return utils.hex((await this.web3Provider.getGasPrice()).toString());
+    }
+    
+    /**
+     * @param ...args
+     * @returns {Object}
+     */
+    getBlock(...args) {
+        return this.web3Provider.getBlock(...args);
     }
     
     /**
@@ -70,11 +89,11 @@ class Methods {
     }
 
     /**
-     * @param {String} hash 
+     * @param {String} address
      * @returns {Number}
      */
-    async getBalance(address) {
-        return (await this.web3Provider.getBalance(address));
+    getBalance(address) {
+        return this.web3Provider.getBalance(address);
     }
     
 }
