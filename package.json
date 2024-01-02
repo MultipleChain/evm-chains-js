@@ -40,7 +40,6 @@
     "@walletconnect/modal": "^2.6.2",
     "abi-decoder": "^2.4.0",
     "bignumber.js": "^9.0.2",
-    "ethers": "^6.9.1",
     "os": "^0.1.2",
     "web3": "^1.10.3"
   },

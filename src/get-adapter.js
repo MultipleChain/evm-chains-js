@@ -6,6 +6,7 @@ const adapters = {
     phantom: require('./adapters/phantom'),
     bitget: require('./adapters/bitget'),
     okx: require('./adapters/okx'),
+    xdefi: require('./adapters/xdefi'),
 }
 
 /**

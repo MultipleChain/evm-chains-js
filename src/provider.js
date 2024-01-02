@@ -1,7 +1,7 @@
+const Web3 = require('web3');
 const utils = require('./utils');
 const Coin = require('./entity/coin');
 const Token = require('./entity/token');
-const choose = require('./choose-package');
 const wagmiChains = require('@wagmi/chains');
 const Contract = require('./entity/contract');
 const Transaction = require('./entity/transaction');
@@ -49,11 +49,6 @@ class Provider {
     web3Modal;
 
     /**
-     * @var {String}
-     */
-    package = 'web3';
-
-    /**
      * @var {Object}
      */
     network = {};
@@ -85,7 +80,6 @@ class Provider {
 
         this.testnet = options.testnet;
         this.wcProjectId = options.wcProjectId;
-        this.package = options.package || 'web3';
         this.wcThemeMode = options.wcThemeMode || 'light';
         this.wcCustomWallets = options.wcCustomWallets || [];
 
@@ -131,13 +125,12 @@ class Provider {
             throw new Error('Invalid network!');
         }
 
-        let providers = choose(this.package);
 
-        this.setWeb3Provider(new providers.HttpProvider(this.network.rpcUrl));
+        this.setWeb3Provider(new Web3(new Web3.providers.HttpProvider(this.network.rpcUrl)));
 
         if (this.network.wsUrl) {
             this.qrPayments = true;
-            this.web3ws = new providers.WebsocketProvider(this.network.wsUrl);
+            this.web3ws = new Web3(new Web3.providers.WebsocketProvider(this.network.wsUrl));
         }
     }
 
@@ -151,19 +144,6 @@ class Provider {
      * @returns {Object}
      */
     async listenTransactions(options, callback) {
-        if (this.package === 'web3') {
-            this.web3ListenTransactions(options, callback);
-        } else {
-            this.ethersListenTransactions(options, callback);
-        }
-    }
-
-    /**
-     * @param {Object} options
-     * @param {Function} callback
-     * @returns {Object}
-     */
-    async web3ListenTransactions(options, callback) {
         let receiver = options.receiver;
         let tokenAddress = options.tokenAddress;
         if (this.web3ws) {
@@ -202,60 +182,10 @@ class Provider {
     }
 
     /**
-     * @param {Object} options
-     * @param {Function} callback
-     * @returns {Object}
-     */
-    async ethersListenTransactions(options, callback) {
-        const receiver = options.receiver;
-        const tokenAddress = options.tokenAddress;
-        const subscription = {
-            unsubscribe: () => {} // will add later
-        }
-        if (this.web3ws) {
-            if (tokenAddress) {
-                const contract = this.methods.contract(tokenAddress, require('../resources/erc20.json'), this.web3ws);
-            
-                const eventHandler = (from, to, value, event) => {
-                    if (to === receiver) {
-                        callback(subscription, this.Transaction(event.log.transactionHash));
-                    }
-                };
-
-                const listener = contract.on("Transfer", eventHandler);
-                subscription.unsubscribe = () => {
-                    listener.off("Transfer", eventHandler);
-                }
-            } else {
-                let balance = await this.methods.getBalance(receiver);
-                const eventHandler = async (blockNumber) => {
-                    const newbalance = await this.methods.getBalance(receiver);
-                    if (balance < newbalance) {
-                        balance = await this.methods.getBalance(receiver);
-                        let currentBlock = await this.methods.getBlock(blockNumber, true);
-                        currentBlock.transactions.forEach(async transactionHash => {
-                            const transaction = await this.methods.getTransaction(transactionHash);
-                            if (transaction.to && transaction.to.toLowerCase() == receiver.toLowerCase()) {
-                                callback(subscription, this.Transaction(transaction.hash));
-                            }
-                        });
-                    }
-                };
-                this.web3ws.on('block', eventHandler);
-                subscription.unsubscribe = () => {
-                    this.web3ws.off("block", eventHandler);
-                }
-            }
-        } else {
-            throw new Error('Websocket provider not found!');
-        }
-    }
-
-    /**
      * @param {Object} web3Provider 
      */
     setWeb3Provider(web3Provider) {
-        const Methods = this.package === 'web3' ? require('./methods/web3') : require('./methods/ethers');
+        const Methods = require('./methods');
         this.methods = new Methods(this, this.web3 = web3Provider);
     }
 
@@ -353,6 +283,7 @@ class Provider {
                 phantom: new Wallet('phantom', this),
                 bitget: new Wallet('bitget', this),
                 okx: new Wallet('okx', this),
+                xdefi: new Wallet('xdefi', this),
             };
 
             if (this.wcProjectId) {
