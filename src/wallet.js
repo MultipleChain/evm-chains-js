@@ -1,5 +1,5 @@
+const Web3 = require('web3');
 const utils = require('./utils');
-const choose = require('./choose-package');
 const getAdapter = require('./get-adapter');
 
 class Wallet {
@@ -164,8 +164,6 @@ class Wallet {
                     }
                     
                     this.provider.setConnectedWallet(this);
-                    let providers = choose(this.provider.package);
-                    this.provider.setWeb3Provider(new providers.Web3Provider(this.wallet));
 
                     this.connectedAccount = (await this.getAccounts())[0];
                     this.connectedNetwork = this.provider.network;
@@ -310,20 +308,6 @@ class Wallet {
      * @returns {Prmise<Object>}
      */
     deployContract(abi, byteCode, args = [], value = null) {
-        if (this.provider.package === 'web3') {
-            return this.web3DeployContract(abi, byteCode, args);
-        } else {
-            return this.ethersDeployContract(abi, byteCode, args, value);
-        }
-    }
-
-    /**
-     * @param {Array} abi 
-     * @param {String} byteCode 
-     * @param  {Array} args 
-     * @returns {Prmise<Object>}
-     */
-    web3DeployContract(abi, byteCode, args) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -352,35 +336,6 @@ class Wallet {
                 .catch(function(error){
                     utils.rejectMessage(error, reject);
                 });
-            } catch (error) {
-                utils.rejectMessage(error, reject);
-            }
-        });
-    }
-
-    /**
-     * @param {Array} abi 
-     * @param {String} byteCode 
-     * @param  {Array} args 
-     * @param {Number} value
-     * @returns {Prmise<Object>}
-     */
-    ethersDeployContract(abi, byteCode, args = [], value = null) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let factory = this.provider.methods.contractFactory(
-                    abi, byteCode, await this.provider.web3.getSigner()
-                );
-                
-                if (value) {
-                    args.push({value: ethers.utils.parseEther(value)});
-                }
-
-                const deployedContract = await factory.deploy(...args);
-
-                await deployedContract.waitForDeployment();
-
-                resolve(deployedContract.target);
             } catch (error) {
                 utils.rejectMessage(error, reject);
             }
