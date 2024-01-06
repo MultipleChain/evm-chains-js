@@ -1,4 +1,4 @@
-const Web3 = require('web3');
+const ethers = require('ethers');
 const utils = require('./utils');
 const getAdapter = require('./get-adapter');
 
@@ -164,6 +164,7 @@ class Wallet {
                     }
                     
                     this.provider.setConnectedWallet(this);
+                    this.provider.setWeb3Provider(new ethers.BrowserProvider(this.wallet));
 
                     this.connectedAccount = (await this.getAccounts())[0];
                     this.connectedNetwork = this.provider.network;
@@ -310,32 +311,19 @@ class Wallet {
     deployContract(abi, byteCode, args = [], value = null) {
         return new Promise(async (resolve, reject) => {
             try {
-
-                let contract = this.provider.methods.contractFactory(abi);
-                let deployer = contract.deploy({
-                    data: byteCode,
-                    arguments: args
-                });
-
-                let estimateGas = await this.provider.methods.getEstimateGas({
-                    from: this.connectedAccount,
-                    data: deployer.encodeABI()
-                });
+                let factory = this.provider.methods.contractFactory(
+                    abi, byteCode, await this.provider.web3.getSigner()
+                );
                 
-                if (!estimateGas) {
-                    return reject('transaction-create-fail');
+                if (value) {
+                    args.push({value: ethers.utils.parseEther(value)});
                 }
 
-                deployer.send({
-                    gas: estimateGas,
-                    from: this.connectedAccount
-                })
-                .then(function(newContractInstance){
-                    resolve(newContractInstance);
-                })
-                .catch(function(error){
-                    utils.rejectMessage(error, reject);
-                });
+                const deployedContract = await factory.deploy(...args);
+
+                await deployedContract.waitForDeployment();
+
+                resolve(deployedContract.target);
             } catch (error) {
                 utils.rejectMessage(error, reject);
             }
