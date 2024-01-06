@@ -1,5 +1,3 @@
-const switcher = require('./switcher.js');
-
 module.exports = () => {
     
     const wallet = window?.xfi?.ethereum;
