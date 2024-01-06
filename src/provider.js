@@ -289,6 +289,7 @@ class Provider {
                 phantom: new Wallet('phantom', this),
                 bitget: new Wallet('bitget', this),
                 okx: new Wallet('okx', this),
+                xdefi: new Wallet('xdefi', this),
             };
 
             if (this.wcProjectId) {
