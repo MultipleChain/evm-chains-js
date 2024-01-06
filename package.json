@@ -4,7 +4,7 @@
   "version": "0.2.2",
   "description": "A library that makes it easy to connect to EVM-based wallets and make transactions quickly.",
   "scripts": {
-    "serve": "parcel test.html --no-cache --dist-dir test",
+    "serve": "parcel test.html --port 4031 --no-cache --dist-dir test",
     "build": "webpack",
     "push": "webpack && npm publish"
   },
