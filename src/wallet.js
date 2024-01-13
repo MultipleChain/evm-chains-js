@@ -113,6 +113,9 @@ class Wallet {
      * @returns {String}
      */
     async getChainId() {
+        if (this.wallet?.chainId) {
+            return this.wallet?.chainId;
+        }
         return parseInt((await this.request({method: 'eth_chainId'})), 16);
     }
 
