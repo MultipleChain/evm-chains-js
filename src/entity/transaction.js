@@ -82,7 +82,7 @@ class Transaction {
             await this.getData();
         }
         if (this.data.input != '0x') {
-            let decodedInput = utils.abiDecoder(this.data.input);
+            let decodedInput = utils.abiDecoder(this.data.data);
             let receiver = decodedInput.params[0].value;
             let amount = decodedInput.params[1].value;
             return { receiver, amount };

@@ -13,10 +13,6 @@ class Token {
      */
     contract;
     
-    /**
-     * @var {Object}
-     */
-    methods;
 
     /**
      * @var {Object} 
@@ -29,10 +25,10 @@ class Token {
      * @param {Provider} provider
      */
     constructor(address, abi = null, provider) {
+        abi = abi || ABI;
         this.address = address;
         this.provider = provider;
-        this.contract = provider.Contract(address, abi || ABI);
-        this.methods = this.contract.methods;
+        this.contract = this.provider.methods.contract(this.address, abi, this.provider.web3);
     }
 
     /**
@@ -46,21 +42,21 @@ class Token {
      * @returns {String|Object}
      */
     getName() {
-        return this.methods.name().call();
+        return this.contract.name();
     }
 
     /**
      * @returns {String|Object}
      */
     getSymbol() {
-        return this.methods.symbol().call();
+        return this.contract.symbol();
     }
 
     /**
      * @returns {String|Object}
      */
-    getDecimals() {
-        return this.methods.decimals().call();
+    async getDecimals() {
+        return parseInt((await this.contract.decimals()));
     }
 
     /**
@@ -68,7 +64,7 @@ class Token {
      */
     async getTotalSupply() {
         let decimals = await this.getDecimals();
-        let totalSupply = await this.methods.totalSupply().call();
+        let totalSupply = await this.contract.totalSupply();
         return utils.toDec(totalSupply, decimals);
     }
 
@@ -78,7 +74,7 @@ class Token {
      */
     async getBalance(address) {
         let decimals = await this.getDecimals();
-        let balance = await this.methods.balanceOf(address).call();
+        let balance = await this.contract.balanceOf(address);
         return utils.toDec(balance, decimals);
     }
 
@@ -101,8 +97,8 @@ class Token {
     
                 amount = utils.toHex(amount, (await this.getDecimals()));
     
-                let data = await this.contract.getData('transfer', [to, amount]);
-                let gas = await this.contract.getEstimateGas('transfer', [to, amount], {from});
+                const data = await this.contract.interface.encodeFunctionData('transfer', [to, amount]);
+                const gas = utils.hex(await this.contract.transfer.estimateGas(to, amount, {from}));
     
                 return resolve([{
                     to: this.address,
@@ -127,8 +123,8 @@ class Token {
             try {
                 amount = utils.toHex(amount, (await this.getDecimals()));
                 
-                let data = this.contract.getData('approve', [spender, amount]);
-                let gas = await this.contract.getEstimateGas('approve', [spender, amount], {from});
+                const data = await this.contract.interface.encodeFunctionData('approve', [spender, amount]);
+                const gas = utils.hex(await this.contract.approve.estimateGas(spender, amount, {from}));
                 
                 return resolve([{
                     to: this.address,
@@ -150,7 +146,7 @@ class Token {
      */
     async allowance(owner, spender) {
         return parseFloat(utils.toDec(
-            await this.methods.allowance(owner, spender).call(), 
+            await this.contract.allowance(owner, spender), 
             await this.getDecimals()
         ));
     }
