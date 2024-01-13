@@ -113,19 +113,7 @@ class Wallet {
      * @returns {String}
      */
     async getChainId() {
-        let id = await this.request({method: 'eth_chainId'});
-        if (!utils.isNumeric(id)) return parseInt(id, 16);
-        return id;
-    }
-
-    /**
-     * @returns {String}
-     */
-    async getChainHexId() {
-        let id = await this.request({method: 'eth_chainId'});
-        if (id == '0x01') return '0x1';
-        if (!String(id).startsWith('0x')) return '0x' + id.toString(16);
-        return id;
+        return parseInt((await this.request({method: 'eth_chainId'})), 16);
     }
 
     /**
@@ -140,43 +128,28 @@ class Wallet {
      */
     connect() {
         return new Promise((resolve, reject) => {
-            this.connection().then((connectedAccount) => {
-                resolve(connectedAccount);
-            })
-            .catch((error) => {
-                utils.rejectMessage(error, reject);
-            });
-        });
-    }
-
-    /**
-     * @returns {Promise}
-     */
-    connection() {
-        return new Promise((resolve, reject) => {
             this.adapter.connect()
             .then(async wallet => {
                 this.wallet = wallet;
-                let chainHexId = await this.getChainHexId();
-                if (!this.provider.network || this.provider.network.hexId == chainHexId) {
-                    if (!this.provider.network) {
-                        this.provider.setNetwork(chainHexId);
-                    }
-                    
-                    this.provider.setConnectedWallet(this);
-                    this.provider.setWeb3Provider(new ethers.BrowserProvider(this.wallet));
+                let chainId = await this.getChainId();
+                
+                if (!this.provider.network) {
+                    this.provider.setNetwork(chainId);
+                } else if (this.provider.network.id != chainId) {
+                    return reject('not-accepted-chain');
+                } 
 
-                    this.connectedAccount = (await this.getAccounts())[0];
-                    this.connectedNetwork = this.provider.network;
-                    resolve(this.connectedAccount);
-                } else {
-                    reject('not-accepted-chain');
-                }
+                this.provider.setConnectedWallet(this);
+                this.provider.setWeb3Provider(new ethers.BrowserProvider(this.wallet));
+
+                this.connectedAccount = (await this.getAccounts())[0];
+                this.connectedNetwork = this.provider.network;
+                resolve(this.connectedAccount);
             })
             .catch(error => {
                 utils.rejectMessage(error, reject);
             });
-        })
+        });
     }
 
     /**

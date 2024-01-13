@@ -79,18 +79,14 @@ module.exports = (wallet, provider) => {
         });
     }
 
-    const getChainHexId = async () => {
-        let id = await request({method: 'eth_chainId'});
-        if (id == '0x01') return '0x1';
-        if (!String(id).startsWith('0x')) return '0x' + id.toString(16);
-        return id;
+    const getChainId = async () => {
+        return parseInt((await request({method: 'eth_chainId'})), 16);
     }
 
     const maybeSwitch = () => {
         return new Promise(async (resolve, reject) => {
             try {
-                let chainId = network.hexId || hex(network.id);
-                if (await getChainHexId() != chainId) {
+                if (await getChainId() != network.id) {
                     changeNetwork(network)
                     .then(() => {
                         resolve(true);
