@@ -80,6 +80,9 @@ module.exports = (wallet, provider) => {
     }
 
     const getChainId = async () => {
+        if (wallet?.chainId) {
+            return wallet?.chainId;
+        }
         return parseInt((await request({method: 'eth_chainId'})), 16);
     }
 
@@ -89,7 +92,9 @@ module.exports = (wallet, provider) => {
                 if (await getChainId() != network.id) {
                     changeNetwork(network)
                     .then(() => {
-                        resolve(true);
+                        setTimeout(() => {
+                            resolve(true);
+                        }, 1000);
                     })
                     .catch((error) => {
                         reject(error);
