@@ -28,7 +28,7 @@ class Token {
         abi = abi || ABI;
         this.address = address;
         this.provider = provider;
-        this.contract = this.provider.methods.contract(this.address, abi, this.provider.web3);
+        this.contract = provider.methods.contract(address, abi, provider.web3);
     }
 
     /**

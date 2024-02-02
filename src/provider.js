@@ -3,6 +3,7 @@ const utils = require('./utils');
 const Methods = require('./methods');
 const Coin = require('./entity/coin');
 const Token = require('./entity/token');
+const Contract = require('./entity/contract');
 const wagmiChains = require('@wagmi/chains');
 const Transaction = require('./entity/transaction');
 
@@ -333,8 +334,8 @@ class Provider {
      * @param {Array} abi 
      * @returns {Contract}
      */
-    newContract(abi) {
-        return this.methods.newContract(abi);
+    Contract(address, abi) {
+        return new Contract(address, abi, this);
     }
 
     /**
