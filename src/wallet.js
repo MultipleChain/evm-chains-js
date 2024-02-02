@@ -297,9 +297,7 @@ class Wallet {
 
                 const deployedContract = await factory.deploy(...args);
 
-                await deployedContract.waitForDeployment();
-
-                resolve(deployedContract.target);
+                resolve(deployedContract);
             } catch (error) {
                 utils.rejectMessage(error, reject);
             }
