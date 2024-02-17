@@ -170,7 +170,7 @@ class Provider {
                     if (balance < newbalance) {
                         balance = await this.methods.getBalance(receiver);
                         let currentBlock = await this.methods.getBlock(blockNumber, true);
-                        if (currentBlock.transactions) {
+                        if (currentBlock?.transactions) {
                             currentBlock.transactions.forEach(async transactionHash => {
                                 const transaction = await this.methods.getTransaction(transactionHash);
                                 if (transaction.to && transaction.to.toLowerCase() == receiver.toLowerCase()) {
